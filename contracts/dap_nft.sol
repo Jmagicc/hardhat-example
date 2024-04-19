@@ -48,7 +48,7 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
     //    uint256 amount = 2;         Actual can mint quantity = amount
     function setVipAddressLimit(address[] memory addresses, int256 amount) external onlyOwner {
         require(addresses.length > 0, "Addresses array is empty");
-        require(amount > 1, "Amount must be greater than or equal to 0");
+        require(amount > 1, "Amount must be greater than to 1");
 
         for (uint256 i = 0; i < addresses.length; i++) {
             mintAccountMap[addresses[i]] = 1 - amount;
