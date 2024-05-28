@@ -11,12 +11,12 @@ module.exports = {
     merlinTestnet: {
       url: "https://testnet-rpc.merlinchain.io",
       chainId: 686868,
-      accounts: [process.env.ACCOUNT_PRIVATE_KEY], 
+      // accounts: [process.env.ACCOUNT_PRIVATE_KEY], 
     },
      merlinMainnet: {
       url: "https://rpc.merlinchain.io", 
       chainId: 4200,
-      accounts: [process.env.ACCOUNT_PRIVATE_KEY], 
+      // accounts: [process.env.ACCOUNT_PRIVATE_KEY], 
     }
   },
   etherscan: {
