@@ -149,11 +149,7 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     }
 
     // get all parameters associated with account
-    function getParameters(address account)
-    public
-    view
-    returns (uint256[] memory)
-    {
+    function getParameters(address account)public view returns (uint256[] memory) {
         uint256[] memory paraList = new uint256[](uint256(16));
         paraList[0] = 0;
         if (mbStart) paraList[0] = 1;
