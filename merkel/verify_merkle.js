@@ -18,7 +18,7 @@ const { log } = require('console');
 // console.log('proof:: ', proof);  // Contract input, double quotes instead of single quotes
 // console.log('verify:: ', isWhiteList);
 
-// rootHash::  0xeefbcbf65c7624fa1a07459c524cd3a1b985fa535b864cdf1fa4cc344b6c0f6a
+// rootHash::  0x9975b4e80ee80c53b7d3ad7dea09f60b11c14c4813f9d2d71a19c33c64c42b84
 // proof::  [
 //     '0x7752443926179ab91a043ecc86eaf2cb14ca7a648a61e77503ecc4823a694686',
 //     '0x80494ef4bf243f44d15738160cdaf301ccd3a91b9c0a133c1e220d79314689db',
@@ -29,9 +29,11 @@ const { log } = require('console');
 //     '0x8827aeb3c8663af58bf028cc1655623507b046bb3e20dea6bdccb309097f2fa2',
 //     '0x5e2c77a884288caf84d63530a31b6418126313ce9687c4f04af1c995d35f8dd9',
 //     '0x82a748e72e44a168b7f777953b566f283417b0005a3cdee7aaf587435910f27e',
-//     '0x8e508bd39146ece0b05ce303f1cece8fc8e7424b8389ac0e9363847bcba82791'
+//     '0xfbce61c8c7d129d5521b85d9be20813e9a45b909f227ca7fbc1abcdd4827d291',
+//     '0x4e0c29d5e80e6342c82c488d4babc86589231993427de89f1395ac1bd06fc960'
 // ]
 // verify::  true
+
 
 // Read whitelist addresses and create Merkle trees
 function createMerkleTree() {
@@ -58,3 +60,7 @@ function getProofForAddress(address) {
 }
 
 module.exports = { getProofForAddress,getRootHash };
+
+
+// B²  mainnet
+// DAP_NFT: 0xe30683D90fa2A21342FA430e67Bbb169d8A3b654
