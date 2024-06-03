@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
-    uint256 public mintPrice = 0.0001 ether;
+    uint256 public mintPrice = 0.00015 ether;
     uint256 public startTime;
     uint256 public endTime;
     uint256 public paidMintCount;
@@ -17,6 +17,9 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     // VIP address can mint quantity
     mapping(address => int256) mintAccountMap;
+
+    // feat: After the whitelist time ends, each address has a maximum of 2 mint
+    mapping(address => uint256) public mintCountAfterEndTime;
 
     uint256 private _totalSupply; // Currently issued NFT, including NFT purchased through VIP and non-VIP channels
 
@@ -29,7 +32,7 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
     constructor(string memory name, string memory symbol, bytes32 root, uint256 startTimeStamp, uint256 endTimeStamp) ERC721(name, symbol) Ownable(msg.sender) {
         require(endTimeStamp > startTimeStamp, "End time must be after start time");
         distributionRoot = root;
-        _totalSupply = 8888;
+        _totalSupply = 5222;
         tokenId = 0;
         startTime = startTimeStamp;
         endTime =  endTimeStamp;
@@ -87,11 +90,16 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         bool isWlUser = checkIfUserIsWhitelisted(msg.sender, proof);
 
-        if (block.timestamp <= endTime && paidMintCount > 6888) {
-            // reserve 2000 for white list users to get through
+        // feat: The default whitelist address has 3000 whitelists
+        if (block.timestamp <= endTime && wlMintCount <= 3000 ) {
             if (!isWlUser) {
                 return;
             }
+        }
+
+        // feat: After the whitelist time ends, each address has a maximum of 2 mint
+        if (block.timestamp > endTime) {
+            require(mintCountAfterEndTime[msg.sender] < 2, "Each address can only mint up to 2 NFTs after end time");
         }
 
         // Within Wl USER reserved mint time window
@@ -105,6 +113,9 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
             paidMintCount++;
         }
 
+        if (block.timestamp > endTime) {
+            mintCountAfterEndTime[msg.sender] += 1;
+        }
         mintAccountMap[msg.sender]++;
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
@@ -115,5 +126,16 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     function getMintedAmounts() public onlyOwner view returns (uint256, uint256) {
         return (wlMintCount, paidMintCount);
+    }
+
+    // feat: Owner can mint NFT
+    function mintByOwner(string memory uri) public onlyOwner {
+        require(tokenId < _totalSupply, "Maximum supply reached");
+
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, uri);
+
+        emit NFTMinted(msg.sender, tokenId, uri, false);
+        tokenId++;
     }
 }
