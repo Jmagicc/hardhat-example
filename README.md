@@ -41,3 +41,4 @@ To set up and run the tests locally, follow these steps:
 By following the above steps, you can deploy the contracts, run the test cases, and ensure the functionality of the AIStarterPublicSale smart contract.
 
 ![Test Results](test-result.png)
+![Test Nft](test-nft.png)

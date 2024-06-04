@@ -86,7 +86,9 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
     function mintNFT(string memory uri, bytes32[] memory proof) public payable nonReentrant {
         require(block.timestamp > startTime, "Time has not started yet");
         require(wlMintCount + paidMintCount <= totalSupply(), "Maximum supply reached");
-        require(mintAccountMap[msg.sender] < 1);
+        if (block.timestamp < endTime) {
+            require(mintAccountMap[msg.sender] < 1 , "The opportunity for this address to be on the whitelist is insufficient");
+        }
 
         bool isWlUser = checkIfUserIsWhitelisted(msg.sender, proof);
 
