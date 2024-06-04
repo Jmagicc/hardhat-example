@@ -36,6 +36,7 @@ To set up and run the tests locally, follow these steps:
 
 3. **Run Tests on Localhost**
     - Execute tests on the local network by running `npx hardhat test --network localhost`.
+    - eg. `npx hardhat test --network localhost test/dap_nft.js`
 
 By following the above steps, you can deploy the contracts, run the test cases, and ensure the functionality of the AIStarterPublicSale smart contract.
 

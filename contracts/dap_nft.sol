@@ -106,10 +106,10 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
         if (isWlUser) {
             wlMintCount++;
         } else {
-            require(msg.value >= mintPrice, "Insufficient merlin btc sent");
+            require(msg.value >= mintPrice, "Insufficient sent");
 
             (bool sent, ) = payable(owner()).call{value: msg.value}("");
-            require(sent, "Failed to send merlin btc");
+            require(sent, "Failed to send");
             paidMintCount++;
         }
 
