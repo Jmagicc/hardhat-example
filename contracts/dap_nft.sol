@@ -90,8 +90,8 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         bool isWlUser = checkIfUserIsWhitelisted(msg.sender, proof);
 
-        // feat: The default whitelist address has 3000 whitelists
-        if (block.timestamp <= endTime && wlMintCount <= 3000 ) {
+        // feat: reserve 3000 for white list users to get through
+        if (block.timestamp <= endTime && paidMintCount > 2222 ) {
             if (!isWlUser) {
                 return;
             }
