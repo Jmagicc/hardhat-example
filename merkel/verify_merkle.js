@@ -19,7 +19,7 @@ console.log('proof:: ', proof);  // Contract input, double quotes instead of sin
 console.log('verify:: ', isWhiteList);
 
 
-// rootHash::  0x1616fe05a5e33494f9daa37158d53e5a30d62b9d0e3e8bc022472f1cee3cca98
+// rootHash::  0xd11672a6e0db75d61072cb33fc3d3963e69d3500b6fb12ef9b9ee8568b1a9ede
 // proof::  [
 //     '0xd02dd8df66b7981f4186e837b5601f692acbeb7460d6facef1e2997bc653dd29',
 //     '0x4e591a967a5d6d4831ec0a4750c0b3a62a6acab8074c2ab11b0c639115b68b0e',
@@ -32,7 +32,7 @@ console.log('verify:: ', isWhiteList);
 //     '0xd71c8ce25befa691d6e96012300760ced54c530c0648dc45c704ceef9767a991',
 //     '0xfbce61c8c7d129d5521b85d9be20813e9a45b909f227ca7fbc1abcdd4827d291',
 //     '0xe06174cc2dadc776d95e45c71c215523cf0e06e3e6b804081a2938a2815f0086',
-//     '0x3b0409fae75fe3205533ea83755bc87df326d0a73ad2630a73d191427aca078a'
+//     '0xb7a73bdf7c539dd1fddd06789d4ca0abb7266d2e0fe838183681336e719c8515'
 // ]
 // verify::  true
 

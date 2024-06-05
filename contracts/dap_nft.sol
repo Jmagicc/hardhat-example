@@ -14,6 +14,7 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
     uint256 public tokenId;
     uint256 public wlMintCount;
     bytes32 public distributionRoot;
+    uint256 public wlLength;
 
     // VIP address can mint quantity
     mapping(address => int256) mintAccountMap;
@@ -29,13 +30,14 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
     event VipAddressLimitSet(address[] addresses, int256 amount);
     event NFTMinted(address indexed owner, uint256 tokenId, string uri, bool isWhitelisted);
 
-    constructor(string memory name, string memory symbol, bytes32 root, uint256 startTimeStamp, uint256 endTimeStamp) ERC721(name, symbol) Ownable(msg.sender) {
+    constructor(string memory name, string memory symbol, bytes32 root, uint256 startTimeStamp, uint256 endTimeStamp,uint256 wlLengthCount) ERC721(name, symbol) Ownable(msg.sender) {
         require(endTimeStamp > startTimeStamp, "End time must be after start time");
         distributionRoot = root;
         _totalSupply = 5222;
         tokenId = 0;
         startTime = startTimeStamp;
         endTime =  endTimeStamp;
+        wlLength = wlLengthCount;
     }
 
     function totalSupply() public view returns (uint256) {
@@ -54,8 +56,9 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
         emit SaleEventTimeUpdated(startTimeStamp, endTimeStamp);
     }
 
-    function setDistributionRoot(bytes32 root) public onlyOwner {
+    function setDistributionRoot(bytes32 root,uint256 wlLengthCount) public onlyOwner {
         distributionRoot = root;
+        wlLength=wlLengthCount;
         emit DistributionRootUpdated(root);
     }
 
@@ -92,11 +95,13 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         bool isWlUser = checkIfUserIsWhitelisted(msg.sender, proof);
 
+        if (block.timestamp <= endTime) {
+            require(isWlUser,"The address is not on the whitelist");
+        }
+
         // feat: reserve 3000 for white list users to get through
-        if (block.timestamp <= endTime && paidMintCount > 2222 ) {
-            if (!isWlUser) {
-                return;
-            }
+        if (block.timestamp <= endTime && paidMintCount > _totalSupply-wlLength ) { 
+            require(isWlUser,"The whitelist quota has been used up");
         }
 
         // feat: After the whitelist time ends, each address has a maximum of 2 mint
@@ -128,16 +133,5 @@ contract NFTContract is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     function getMintedAmounts() public onlyOwner view returns (uint256, uint256) {
         return (wlMintCount, paidMintCount);
-    }
-
-    // feat: Owner can mint NFT
-    function mintByOwner(string memory uri) public onlyOwner {
-        require(tokenId < _totalSupply, "Maximum supply reached");
-
-        _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, uri);
-
-        emit NFTMinted(msg.sender, tokenId, uri, false);
-        tokenId++;
     }
 }

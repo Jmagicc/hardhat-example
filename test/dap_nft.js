@@ -28,7 +28,8 @@ describe("NFTContract", function () {
             "DAP_NFT",
             distributionRoot,
             startTime,
-            endTime
+            endTime,
+            3000,
         ];
         nftContract = await NFT.deploy(...args);
         await nftContract.waitForDeployment();
@@ -45,7 +46,7 @@ describe("NFTContract", function () {
         it("2.1 Non-whitelisted users cannot mint NFTs during whitelist time", async function () {
             // Assume Merkle proof for non-whitelisted user
             const badProof = ["0x0000000000000000000000000000000000000000000000000000000000000000"];
-            await expect(nftContract.connect(addr7).mintNFT("uri", badProof)).to.be.revertedWith("Insufficient sent");
+            await expect(nftContract.connect(addr7).mintNFT("uri", badProof,{ value: ethers.parseEther("0.00015") })).to.be.revertedWith("The address is not on the whitelist");
         });
 
         it("2.2 Whitelisted users can mint NFTs during whitelist time", async function () {
@@ -53,7 +54,7 @@ describe("NFTContract", function () {
             const correctProof = getProofForAddress(owner.address)
             expect(correctProof).to.not.be.empty;
             // Simulate whitelisted user minting NFT
-            await expect(nftContract.connect(addr1).mintNFT("uri", correctProof,{ value: ethers.parseEther("0.00015")})).to.emit(nftContract, "NFTMinted");
+            await expect(nftContract.connect(owner).mintNFT("uri", correctProof,{ value: ethers.parseEther("0.00015")})).to.emit(nftContract, "NFTMinted");
         });
 
         it("2.3 Non-whitelisted users can mint NFTs by paying ETH after whitelist time ends", async function () {
@@ -78,11 +79,7 @@ describe("NFTContract", function () {
             expect(await nftContract.mintPrice()).to.equal(newMintPrice);
         });
 
-        it("3.2 Owner can mint NFTs without restrictions", async function () {
-            await expect(nftContract.connect(owner).mintByOwner("uri")).to.emit(nftContract, "NFTMinted");
-        });
-
-        it("3.3 Owner can update sale event time, minting should be blocked at that time", async function () {
+        it("3.2 Owner can update sale event time, minting should be blocked at that time", async function () {
             const newStartTime = startTime + 3600; // Update start time to 1 hour ahead
             const newEndTime = newStartTime + 86400; // Update end time to 24 hours after start
 
@@ -96,9 +93,10 @@ describe("NFTContract", function () {
             await expect(nftContract.connect(addr1).mintNFT("uri", proof)).to.be.revertedWith("Time has not started yet");
         });
 
-        it("3.4 Owner can update Merkle tree root", async function () {
+        it("3.3 Owner can update Merkle tree root", async function () {
             const newRoot = getRootHash();
-            await nftContract.setDistributionRoot(newRoot);
+            const wlLengthCount = 3001;
+            await nftContract.setDistributionRoot(newRoot,wlLengthCount);
             expect(await nftContract.distributionRoot()).to.equal(newRoot);
         });
     });
@@ -113,7 +111,12 @@ describe("NFTContract", function () {
 
         it("4.2 Paid user minting NFT should correctly increase minting count", async function () {
             const initialPaidMintCount = await nftContract.paidMintCount();
+            // mock time
+            await ethers.provider.send("evm_increaseTime", [86400 + 1]);
+            await ethers.provider.send("evm_mine");
+
             await nftContract.connect(addr7).mintNFT("uri", [], { value: ethers.parseEther("0.00015") });
+            
             const updatedPaidMintCount = await nftContract.paidMintCount();
             expect(updatedPaidMintCount).to.equal(parseInt(initialPaidMintCount) + 1);
         });
