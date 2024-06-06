@@ -19,7 +19,7 @@ console.log('proof:: ', proof);  // Contract input, double quotes instead of sin
 console.log('verify:: ', isWhiteList);
 
 
-// rootHash::  0xd2fa415ea6ea1add2e97ff763bbd28f0f38ce8914a5d263a665f1430869354e3
+// rootHash::  0x6a201272f0ca0c912211d4ac7c347ab65b1be0447b139a26908a65705f322517
 // proof::  [
 //     '0x7752443926179ab91a043ecc86eaf2cb14ca7a648a61e77503ecc4823a694686',
 //     '0x80494ef4bf243f44d15738160cdaf301ccd3a91b9c0a133c1e220d79314689db',
@@ -32,9 +32,10 @@ console.log('verify:: ', isWhiteList);
 //     '0x82a748e72e44a168b7f777953b566f283417b0005a3cdee7aaf587435910f27e',
 //     '0xfbce61c8c7d129d5521b85d9be20813e9a45b909f227ca7fbc1abcdd4827d291',
 //     '0xe06174cc2dadc776d95e45c71c215523cf0e06e3e6b804081a2938a2815f0086',
-//     '0x0e6ba869f5d980f5ab73dd2f96066221207c2fb3915e5255ee5b2f6ec2907a2e'
+//     '0x4ecb7cc2e1e29c6f1dbc554efcc1ec3f92827fc915f93bd115b711fe398407d6'
 // ]
 // verify::  true
+
 
 // Read whitelist addresses and create Merkle trees
 function createMerkleTree() {
