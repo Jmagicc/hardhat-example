@@ -19,7 +19,7 @@ describe("AIStarterPublicSale Contract", function () {
         mFundAddress= addr1.address
   
         // deploy GLDToken
-        const GLDToken = await hre.ethers.getContractFactory("GLDToken");
+        const GLDToken = await hre.ethers.getContractFactory("CLOTToken");
         gldToken = await GLDToken.deploy("10000000000000000000000");
         await gldToken.waitForDeployment();
         // deploy AIStarterPublicSale

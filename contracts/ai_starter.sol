@@ -33,7 +33,9 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     // total participant
     uint256 private _addrAmount;
     // user buy amount (if > rewardAmount ,then is over funded)
-    uint256 private _sumAmount;
+    uint256 private _sumAmount; // Total amount
+    uint256 private _sumCount;  // Total number of addresses
+    uint256 public _lockedFunds; // newAdd: After the private placement is completed, lock in 20% of the funds for _sumAmount
 
 
     mapping(address => uint256) private _alreadyClaimNumArr;
@@ -44,18 +46,19 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
         uint256 time;
     }
     mapping(uint256 => sJoinIdoPropertys) private _joinIdoPropertys;
-    uint256 private _sumCount;
+
 
     event JoinIdoCoins(address indexed user, uint256 amount, uint256 id);
     address public mFundAddress;
-    bytes32 public distributionRoot;
+
+
+
 
     constructor(
         address _rewardToken,
         uint256 _joinIdoPrice,
         uint256 _rewardAmount,
-        address _mFundAddress,
-        bytes32 _root
+        address _mFundAddress
     ) Ownable(msg.sender){
         joinIdoPrice = _joinIdoPrice;
         rewardAmount = _rewardAmount;
@@ -66,7 +69,9 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
 
         rewardToken = IERC20(_rewardToken);
         mFundAddress = _mFundAddress;
-        distributionRoot = _root;
+
+
+
     }
 
 
@@ -194,13 +199,13 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
 
     //---write---//
     //join Ido
-    function joinIdo(bytes32[] memory proof) external payable nonReentrant {
+    function joinIdo() external payable nonReentrant {
         require(mbStart, "AIStarterPublicSale: not Start!");
         require(
             block.timestamp < startTime + dt,
             "AIStarterPublicSale: already end!"
         );
-        require(checkIfUserIsWhitelisted(msg.sender, proof), "AIStarterPublicSale: Account not in white list");
+
         require(10**8 <= msg.value, "AIStarterPublicSale:value sent is too small");
         uint256 amount = msg.value;
 
@@ -219,13 +224,12 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     }
 
     //claim Token
-    function claimToken(bytes32[] memory proof) external nonReentrant {
+    function claimToken() external nonReentrant {
         require(mbStart, "AIStarterPublicSale: not Start!");
         require(
             block.timestamp > startTime + dt,
             "AIStarterPublicSale: need end!"
         );
-        require(checkIfUserIsWhitelisted(msg.sender, proof), "AIStarterPublicSale: Account not in white list");
         require(_balance[msg.sender] > 0, "AIStarterPublicSale:balance zero");
         require(
             block.timestamp > startTime + claimDt1,
@@ -272,13 +276,12 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     }
 
     //claim btc
-    function claimBTC(bytes32[] memory proof) external nonReentrant {
+    function claimBTC() external nonReentrant {
         require(mbStart, "AIStarterPublicSale: not Start!");
         require(
             block.timestamp > startTime + dt,
             "AIStarterPublicSale: need end!"
         );
-        require(checkIfUserIsWhitelisted(msg.sender, proof), "AIStarterPublicSale: Account not in white list");
         require(_balance[msg.sender] > 0, "AIStarterPublicSale:balance zero");
         require(
             !_bClaimBTC[msg.sender],
@@ -294,14 +297,14 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     //---write onlyOwner---//
     function setParameters(
         address rewardTokenAddr,
-        uint256 joinIdoPrice0,
-        uint256 rewardAmount0
+        uint256 newJoinIdoPrice,
+        uint256 newrewardAmount
     ) external onlyOwner {
         require(!mbStart, "AIStarterPublicSale: already Start!");
         rewardToken = IERC20(rewardTokenAddr);
 
-        joinIdoPrice = joinIdoPrice0;
-        rewardAmount = rewardAmount0;
+        joinIdoPrice = newJoinIdoPrice;
+        rewardAmount = newrewardAmount;
     }
 
     function setStart(bool bstart) external onlyOwner {
@@ -324,10 +327,34 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
+
+    // fixme:Exclusion from CompleteDivision
     function withdraw(uint256 amount) external {
         require(msg.sender == mFundAddress, "AIStarterPublicSale: not mFundAddress");
         (bool success, ) = payable(mFundAddress).call{value: amount}("");
         require(success, "Low-level call failed");
+    }
+
+    // newAdd: Manually completing the ledger split
+    function CompleteDivision() external onlyOwner {
+        // Calculate the ratio of service fees to the funds received by the project party, and keep the service fees in the contract
+        uint256 projectFunds = (_sumAmount * 70) / 100;
+
+        // Send to the project party
+        (bool success, ) = payable(mFundAddress).call{value: projectFunds}("");
+        require(success, "Transfer to project side failed");
+
+        // Lock in 20% of project funds for a duration of 6 months
+        _lockedFunds = (_sumAmount * 20) / 100;
+    }
+
+    // newAdd: Release locked funds
+    function releaseLockedFunds() external onlyOwner {
+        require(block.timestamp >= 6 * 30 days, "Lock-in funds can not be released until at least six months have");
+        // Transfer the locked funds to the project party
+        (bool success, ) = payable(mFundAddress).call{value: _lockedFunds}("");
+        require(success, "Failure to release locked funds to project side");
+        _lockedFunds = 0;
     }
 
     function withdrawToken(address tokenAddr, uint256 amount)
@@ -336,18 +363,5 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     {
         IERC20 token = IERC20(tokenAddr);
         token.safeTransfer(mFundAddress, amount);
-    }
-
-    function setDistributionRoot(bytes32 root) public onlyOwner {
-        distributionRoot = root;
-    }
-
-    function verifyAddressInWhitelist(address account, bytes32[] memory proof) public view returns (bool) {
-        bytes32 encodedAccount = keccak256(abi.encodePacked(account));
-        return MerkleProof.verify(proof, distributionRoot, encodedAccount);
-    }
-
-    function checkIfUserIsWhitelisted(address user, bytes32[] memory proof) public view returns (bool) {
-        return verifyAddressInWhitelist(user, proof);
     }
 }
