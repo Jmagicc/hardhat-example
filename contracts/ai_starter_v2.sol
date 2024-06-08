@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
+contract Pizzapad is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     // IDO token address
     IERC20 public rewardToken;
@@ -110,7 +110,7 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
         uint256 time
     )
     {
-        require(iD <= _sumCount, "AIStarterPublicSale: exist num!");
+        require(iD <= _sumCount, "Pizzapad: exist num!");
         addr = _joinIdoPropertys[iD].addr;
         joinIdoAmount = _joinIdoPropertys[iD].joinIdoAmount;
         time = _joinIdoPropertys[iD].time;
@@ -126,8 +126,8 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
         uint256[] memory timeArr
     )
     {
-        require(toId <= _sumCount, "AIStarterPublicSale: exist num!");
-        require(fromId <= toId, "AIStarterPublicSale: exist num!");
+        require(toId <= _sumCount, "Pizzapad: exist num!");
+        require(fromId <= toId, "Pizzapad: exist num!");
         addrArr = new address[](toId - fromId + 1);
         joinIdoAmountArr = new uint256[](toId - fromId + 1);
         timeArr = new uint256[](toId - fromId + 1);
@@ -195,13 +195,13 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
     //---write---//
     //join Ido
     function joinIdo() external payable nonReentrant {
-        require(mbStart, "AIStarterPublicSale: not Start!");
+        require(mbStart, "Pizzapad: not Start!");
         require(
             block.timestamp < startTime + dt,
-            "AIStarterPublicSale: already end!"
+            "Pizzapad: already end!"
         );
 
-        require(10**8 <= msg.value, "AIStarterPublicSale:value sent is too small");
+        require(10**8 <= msg.value, "Pizzapad:value sent is too small");
         uint256 amount = msg.value;
 
         if (_balance[msg.sender] == 0) {
@@ -220,15 +220,15 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
 
     //claim Token
     function claimToken() external nonReentrant {
-        require(mbStart, "AIStarterPublicSale: not Start!");
+        require(mbStart, "Pizzapad: not Start!");
         require(
             block.timestamp > startTime + dt,
-            "AIStarterPublicSale: need end!"
+            "Pizzapad: need end!"
         );
-        require(_balance[msg.sender] > 0, "AIStarterPublicSale:balance zero");
+        require(_balance[msg.sender] > 0, "Pizzapad:balance zero");
         require(
             block.timestamp > startTime + claimDt1,
-            "AIStarterPublicSale: need begin claim!"
+            "Pizzapad: need begin claim!"
         );
         uint256 totalExpectedAmount = getExpectedAmount(msg.sender);
         uint256 amountToClaim = 0;
@@ -250,7 +250,7 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
             _alreadyClaimNumArr[msg.sender] = monthsPassed + 1; // 更新已领取次数
         }
 
-        require(amountToClaim > 0, "AIStarterPublicSale: No tokens to claim!");
+        require(amountToClaim > 0, "Pizzapad: No tokens to claim!");
         _balance[msg.sender] -= amountToClaim; // 更新用户余额
         rewardToken.safeTransfer(msg.sender, amountToClaim);
     }
@@ -259,15 +259,15 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
 
     //claim btc
     function claimBTC() external nonReentrant {
-        require(mbStart, "AIStarterPublicSale: not Start!");
+        require(mbStart, "Pizzapad: not Start!");
         require(
             block.timestamp > startTime + dt,
-            "AIStarterPublicSale: need end!"
+            "Pizzapad: need end!"
         );
-        require(_balance[msg.sender] > 0, "AIStarterPublicSale:balance zero");
+        require(_balance[msg.sender] > 0, "Pizzapad:balance zero");
         require(
             !_bClaimBTC[msg.sender],
-            "AIStarterPublicSale:already claim btc"
+            "Pizzapad:already claim btc"
         );
 
         uint256 expectedAmount = getExpectedAmount(msg.sender);
@@ -282,7 +282,7 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
         uint256 newJoinIdoPrice,
         uint256 newrewardAmount
     ) external onlyOwner {
-        require(!mbStart, "AIStarterPublicSale: already Start!");
+        require(!mbStart, "Pizzapad: already Start!");
         rewardToken = IERC20(rewardTokenAddr);
 
         joinIdoPrice = newJoinIdoPrice;
@@ -292,8 +292,7 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
     function setStart(bool bstart) external onlyOwner {
         mbStart = bstart;
         startTime = block.timestamp;
-
-        // 设置线性释放的开始时间为私募结束后三小时
+          // 设置线性释放的开始时间为私募结束后三小时
         linearReleaseStartTime = startTime + dt + 3 * 3600;
         // 设置线性释放的结束时间
         linearReleaseEndTime = linearReleaseStartTime + linearReleaseEndTime;
@@ -317,14 +316,14 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
 
     // fixme:Exclusion from CompleteDivision
     function withdraw(uint256 amount) external {
-        require(msg.sender == mFundAddress, "AIStarterPublicSale: not mFundAddress");
+        require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
         (bool success, ) = payable(mFundAddress).call{value: amount}("");
         require(success, "Low-level call failed");
     }
 
     // newAdd: Manually completing the ledger split
     function CompleteDivision() external onlyOwner {
-        require(!divisionCompleted, "AIStarterPublicSale: Division already completed");
+        require(!divisionCompleted, "Pizzapad: Division already completed");
         // Calculate the ratio of service fees to the funds received by the project party, and keep the service fees in the contract
         uint256 projectFunds = (_sumAmount * 70) / 100;
 
@@ -340,7 +339,7 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
 
     // newAdd: Release locked funds
     function releaseLockedFunds() external onlyOwner {
-        require(block.timestamp >= 6 * 30 days, "Lock-in funds can not be released until at least six months have");
+        require(block.timestamp >=  startTime + 6 * 30 days, "Lock-in funds can not be released until at least six months have");
         // Transfer the locked funds to the project party
         (bool success, ) = payable(mFundAddress).call{value: _lockedFunds}("");
         require(success, "Failure to release locked funds to project side");
@@ -355,3 +354,4 @@ contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
         token.safeTransfer(mFundAddress, amount);
     }
 }
+
