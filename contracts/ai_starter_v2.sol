@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract AIStarterPublicSale is Ownable, ReentrancyGuard {
+contract AIStarterPublicSaleV2 is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     // IDO token address
     IERC20 public rewardToken;
@@ -20,14 +20,16 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     bool public mbStart;
     // public sale opening time
     uint256 public startTime;
-    // endTime = startTime + dt;
+    // endTime = startTime + dt; // IDO的结束时间 = 开始时间 + 持续时间
     uint256 public dt = 39 * 3600;
-    // first claim = endtime + claimDt1
+    // first claim = endtime + claimDt1 // 第一次领取时间 = 结束时间 + 第一次领取延迟
     uint256 public claimDt1;
-    // first claim = endtime + claimDt2
-    uint256 public claimDt2;
-    // first claim = endtime + claimDt3
-    uint256 public claimDt3;
+
+    // 私募结束后三小时开启第一轮claim
+    uint256 public linearReleaseStartTime;
+    // 线性释放结束时间，从线性释放开始时间算起12个月
+    uint256 public linearReleaseEndTime = 12 * 30 days;
+
     // expect amount that user can get (will modify if over funded)
     mapping(address => uint256) private _balance;
     // total participant
@@ -65,14 +67,10 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
         rewardAmount = _rewardAmount;
         // default claim time can be modify if needed
         claimDt1 = dt + 3 * 3600;
-        claimDt2 = claimDt1 + 0 * 24 * 3600;
-        claimDt3 = claimDt1 + 0 * 24 * 3600;
+
 
         rewardToken = IERC20(_rewardToken);
         mFundAddress = _mFundAddress;
-
-
-
     }
 
 
@@ -159,42 +157,38 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
         uint256[] memory paraList = new uint256[](uint256(16));
         paraList[0] = 0;
         if (mbStart) paraList[0] = 1;
-        paraList[1] = startTime; //start Time
-        paraList[2] = startTime + dt; //end Time
-        paraList[3] = joinIdoPrice; //Token Price:
-        paraList[4] = rewardAmount; //max reward Amount
-        paraList[5] = _addrAmount; //Total Participants
-        paraList[6] = _sumAmount; //Total Committed
-        paraList[7] = _balance[account]; //You committed
+        paraList[1] = startTime; // start Time
+        paraList[2] = startTime + dt; // end Time
+        paraList[3] = joinIdoPrice; // Token Price
+        paraList[4] = rewardAmount; // max reward Amount
+        paraList[5] = _addrAmount; // Total Participants
+        paraList[6] = _sumAmount; // Total Committed
+        paraList[7] = _balance[account]; // You committed
         uint256 expectedAmount = getExpectedAmount(account);
-        uint256 refundAmount = _balance[account] - expectedAmount;
-        expectedAmount = expectedAmount * (10**18) / (joinIdoPrice);
-        paraList[8] = expectedAmount; //Expected token Amount
-        paraList[9] = refundAmount; //refund Amount
-        paraList[10] = _alreadyClaimNumArr[account]; //Claim num
-        paraList[11] = 0;
-        if (_bClaimBTC[account]) paraList[11] = 1; //is Claim BTC
+        uint256 refundAmount = _balance[account] > expectedAmount ? _balance[account] - expectedAmount : 0;
+        paraList[8] = expectedAmount * (10**18) / (joinIdoPrice); // Expected token Amount
+        paraList[9] = refundAmount; // refund Amount
+        paraList[10] = _alreadyClaimNumArr[account]; // Claim num
+        paraList[11] = _bClaimBTC[account] ? 1 : 0; // is Claim BTC
 
-        uint256 coe = 0;
-        if (block.timestamp > startTime + claimDt1) {
-            if (_alreadyClaimNumArr[account] < 1) coe = 30;
+        uint256 coe; // can claim ratio
+        if (block.timestamp > linearReleaseStartTime) {
+            if (_alreadyClaimNumArr[account] == 0) {
+                coe = 20;
+            } else {
+                uint256 monthsPassed = (block.timestamp - linearReleaseStartTime) / 30 days;
+                uint256 totalReleasablePercentage = 20 + 80 * monthsPassed / 12;
+                coe = totalReleasablePercentage > 100 ? 100 : totalReleasablePercentage;
+            }
         }
+        paraList[12] = coe; // can claim ratio
 
-        if (block.timestamp > startTime + claimDt2) {
-            if (_alreadyClaimNumArr[account] < 2) coe = coe + 30;
+        uint256 canClaimAmount;
+        if (coe > 0) {
+            uint256 totalReleasable = expectedAmount * coe / 100;
+            canClaimAmount = totalReleasable * (10**18) / joinIdoPrice;
         }
-        if (block.timestamp > startTime + claimDt3) {
-            if (_alreadyClaimNumArr[account] < 3) coe = coe + 40;
-        }
-        paraList[12] = coe; //can claim ratio
-        paraList[13] = (expectedAmount * coe) / 100; //can claim amount
-        uint256 LastCoe = 0;
-        if (_alreadyClaimNumArr[account] < 1) LastCoe = 30;
-        if (_alreadyClaimNumArr[account] < 2) LastCoe = LastCoe + 30;
-        if (_alreadyClaimNumArr[account] < 3) LastCoe = LastCoe + 40;
-        paraList[14] = LastCoe; //last claim ratio
-        paraList[15] = (expectedAmount * LastCoe) / 100; //last claim amount
-
+        paraList[13] = canClaimAmount; // can claim amount
         return paraList;
     }
 
@@ -236,45 +230,32 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
             block.timestamp > startTime + claimDt1,
             "AIStarterPublicSale: need begin claim!"
         );
-        require(
-            _alreadyClaimNumArr[msg.sender] < 3,
-            "AIStarterPublicSale: already claim all!"
-        );
+        uint256 totalExpectedAmount = getExpectedAmount(msg.sender);
+        uint256 amountToClaim = 0;
 
-        uint256 coe = 0;
-        // can change coe if you want to change unlock amount
-        if (_alreadyClaimNumArr[msg.sender] < 1) {
-            coe = 30;
-            _alreadyClaimNumArr[msg.sender] =
-                _alreadyClaimNumArr[msg.sender] +
-                1;
+        // 第一轮领取逻辑
+        if (_alreadyClaimNumArr[msg.sender] == 0 && block.timestamp > linearReleaseStartTime) {
+            // 如果是第一次领取，并且当前时间大于线性释放开始时间
+            amountToClaim = totalExpectedAmount * 20 / 100; // 释放20%
+            _alreadyClaimNumArr[msg.sender] = 1;
         }
-        if (block.timestamp > startTime + claimDt2) {
-            if (_alreadyClaimNumArr[msg.sender] < 2) {
-                coe = coe + 30;
-                _alreadyClaimNumArr[msg.sender] =
-                    _alreadyClaimNumArr[msg.sender] +
-                    1;
-            }
-        }
-        if (block.timestamp > startTime + claimDt3) {
-            if (_alreadyClaimNumArr[msg.sender] < 3) {
-                coe = coe + 40;
-                _alreadyClaimNumArr[msg.sender] =
-                    _alreadyClaimNumArr[msg.sender] +
-                    1;
-            }
+            // 线性释放逻辑
+        else if (_alreadyClaimNumArr[msg.sender] >= 1 && block.timestamp <= linearReleaseEndTime) {
+            // 如果不是第一次领取，并且当前时间小于等于线性释放结束时间
+            uint256 monthsPassed = (block.timestamp - linearReleaseStartTime) / 30 days;
+            // 计算应该释放的总量
+            uint256 totalReleasable = totalExpectedAmount * (20 + 80 * monthsPassed / 12) / 100;
+            // 减去已经领取的数量
+            amountToClaim = totalReleasable - (totalExpectedAmount - _balance[msg.sender]);
+            _alreadyClaimNumArr[msg.sender] = monthsPassed + 1; // 更新已领取次数
         }
 
-        require(coe > 0, "AIStarterPublicSale: claim 0!");
-
-        uint256 expectedAmount = getExpectedAmount(msg.sender);
-        expectedAmount = (expectedAmount * (coe)) / (100);
-
-        expectedAmount = (expectedAmount * 10**18) / joinIdoPrice;
-        if (expectedAmount > 0)
-            rewardToken.safeTransfer(msg.sender, expectedAmount);
+        require(amountToClaim > 0, "AIStarterPublicSale: No tokens to claim!");
+        _balance[msg.sender] -= amountToClaim; // 更新用户余额
+        rewardToken.safeTransfer(msg.sender, amountToClaim);
     }
+
+
 
     //claim btc
     function claimBTC() external nonReentrant {
@@ -311,19 +292,24 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
     function setStart(bool bstart) external onlyOwner {
         mbStart = bstart;
         startTime = block.timestamp;
+
+        // 设置线性释放的开始时间为私募结束后三小时
+        linearReleaseStartTime = startTime + dt + 3 * 3600;
+        // 设置线性释放的结束时间
+        linearReleaseEndTime = linearReleaseStartTime + linearReleaseEndTime;
     }
 
     // set Time
     function setDt(
         uint256 tDt,
-        uint256 tDt1,
-        uint256 tDt2,
-        uint256 tDt3
+        uint256 tDt1
     ) external onlyOwner {
         dt = tDt;
         claimDt1 = tDt1;
-        claimDt2 = tDt2;
-        claimDt3 = tDt3;
+        // 设置线性释放的开始时间为私募结束后三小时
+        linearReleaseStartTime = startTime + dt + 3 * 3600;
+        // 设置线性释放的结束时间
+        linearReleaseEndTime = linearReleaseStartTime + linearReleaseEndTime;
     }
 
     receive() external payable {}
@@ -348,7 +334,6 @@ contract AIStarterPublicSale is Ownable, ReentrancyGuard {
 
         // Lock in 20% of project funds for a duration of 6 months
         _lockedFunds = (_sumAmount * 20) / 100;
-
         // Mark the sub-account as completed to prevent it from being executed again
         divisionCompleted = true;
     }
