@@ -2,6 +2,7 @@ const { deploy } = require("@nomicfoundation/ignition-core");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const hre = require("hardhat");
+const {formatEther} = require("ethers/src.ts/utils/units");
 
 
 describe("Pizzapad Contract", function () {
@@ -21,7 +22,7 @@ describe("Pizzapad Contract", function () {
 
         // deploy CLOTToken
         const CLOTToken = await hre.ethers.getContractFactory("CLOTToken");
-        clotToken = await CLOTToken.deploy(ethers.parseUnits("1000000000", 18));
+        clotToken = await CLOTToken.deploy();
         await clotToken.waitForDeployment();
         // deploy AIStarterPublicSale
         const rewardTokenAddress = await clotToken.getAddress().then((address) => {
@@ -29,8 +30,11 @@ describe("Pizzapad Contract", function () {
             clotTokenAddress= address;
             return address;
         });
-        joinIdoPrice = ethers.parseUnits("1", 18);
-        rewardAmount = ethers.parseUnits("25000000", 18);
+
+        // rewardAmount = ethers.parseUnits("25000000", 18);
+        joinIdoPrice = ethers.formatEther("116000000000", 18);
+        rewardAmount = ethers.formatEther("2900000000000000000", 18);
+        
 
         const args = [
             rewardTokenAddress,
@@ -46,7 +50,7 @@ describe("Pizzapad Contract", function () {
             aiStarterPublicSaleAddress= address;
 
             //  sends some tokens to AIStarterPublicSale
-            clotToken.connect(owner).transfer(address, rewardAmount);
+            clotToken.connect(owner).transfer(address,2500000000);
             return address;
         });
     });
@@ -207,8 +211,41 @@ describe("Pizzapad Contract", function () {
                     // 验证非所有者不能调用
                     await expect(aiStarterPublicSale.connect(addr1).releaseLockedFunds()).to.be.reverted;
                 });
+            it("2.4 Allows user to claim BTC if overfunded", async function () {
+                // 开启 IDO
+                await aiStarterPublicSale.setStart(true);
+                // 用户参与 IDO 
+                await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("1100") });
+                // await aiStarterPublicSale.connect(addr2).joinIdo({ value: ethers.parseEther("200") });
+                // await aiStarterPublicSale.connect(addr3).joinIdo({ value: ethers.parseEther("200") });
+                
+                // 结束 IDO
+                await ethers.provider.send("evm_increaseTime", [3600 * 43+1]); // 快进使 IDO 结束
+                await ethers.provider.send("evm_mine");
 
-        });
+                const ExpectedAmount = await aiStarterPublicSale.getExpectedAmount(addr1);
+                const all =await aiStarterPublicSale.balanceof(addr1);
+
+                const refundAmount = all-ExpectedAmount
+
+                // 用户领取退款前的余额
+                const balanceBefore = await ethers.provider.getBalance(addr1);
+
+                console.log("退款金额: ",refundAmount)
+
+               
+                // 断言用户应获得退款金额
+                await expect(refundAmount > 0, "User should receive a refund for overfunding");
+                // 用户尝试领取
+                await aiStarterPublicSale.connect(addr1).claimBTC();
+                // 用户领取退款后的余额
+                const balanceAfter = await ethers.provider.getBalance(addr1);
+
+                // 检查用户领取退款后的余额是否增加，即用户成功领取了退款
+                expect(balanceAfter === balanceBefore, "User successfully claimed the refund");
+            });
+
+    });
 });
    
 
