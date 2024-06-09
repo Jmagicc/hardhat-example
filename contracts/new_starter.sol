@@ -14,7 +14,7 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     // IDO token price : 0.000000116 BTC, 116000000000
     uint256 public joinIdoPrice = 116000000000;
     // max token Amount for IDO , 2.1750 BTC , 2175000000000000000
-    uint256 public rewardBTCAmount= 2175000000000000000;
+    uint256 public rewardBTCAmount= 2900000000000000000;
     // default false
     bool public idoStart;
     // default no whitelist
@@ -41,7 +41,7 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
 
     mapping(address => uint256) private _alreadyClaimAmount;
     mapping(address => bool) private _bClaimBTC;
-    address[] private _WhiteAddrArr;
+
     struct sJoinIdoPropertys {
         address addr;
         uint256 joinIdoAmount;
@@ -132,24 +132,6 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
 
 
 
-    //get total whitelist amount
-    function getWhiteAccountNum() public view returns (uint256) {
-        return _WhiteAddrArr.length;
-    }
-
-    // get ith whitelist address
-    function getWhiteAccountIth(uint256 ith)
-    public
-    view
-    returns (address WhiteAddress)
-    {
-        require(
-            ith < _WhiteAddrArr.length,
-            "Pizzapad: not in White Adress"
-        );
-        return _WhiteAddrArr[ith];
-    }
-
     //get account amount (if over-funded then modify the amount)
     function getExpectedAmount(address account) public view returns (uint256) {
         uint256 expectedAmount = _balance[account];
@@ -232,6 +214,25 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
         return 2000 + unlockRatio;
     }
 
+    //claim btc
+    function claimBTC() external nonReentrant {
+        require(idoStart, "Pizzapad: not Start!");
+        require(
+            block.timestamp > startTime + idoTimeRange,
+            "Pizzapad: need end!"
+        );
+
+        require(_balance[msg.sender] > 0, "Pizzapad:balance zero");
+        require(
+            !_bClaimBTC[msg.sender],
+            "Pizzapad:already claim btc"
+        );
+        uint256 expectedAmount = getExpectedAmount(msg.sender);
+        uint256 refundAmount = _balance[msg.sender] - (expectedAmount);
+        _bClaimBTC[msg.sender] = true;
+        if (refundAmount > 0) payable(msg.sender).transfer(refundAmount);
+    }
+
     //claim Token
     function claimToken() external nonReentrant {
         require(idoStart, "Pizzapad: not Start!");
@@ -264,24 +265,7 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
         totalClaimAmount += expectedAmount;
     }
 
-    //claim btc
-    function claimBTC() external nonReentrant {
-        require(idoStart, "Pizzapad: not Start!");
-        require(
-            block.timestamp > startTime + idoTimeRange,
-            "Pizzapad: need end!"
-        );
 
-        require(_balance[msg.sender] > 0, "Pizzapad:balance zero");
-        require(
-            !_bClaimBTC[msg.sender],
-            "Pizzapad:already claim btc"
-        );
-        uint256 expectedAmount = getExpectedAmount(msg.sender);
-        uint256 refundAmount = _balance[msg.sender] - (expectedAmount);
-        _bClaimBTC[msg.sender] = true;
-        if (refundAmount > 0) payable(msg.sender).transfer(refundAmount);
-    }
 
     //---write onlyOwner---//
     function setParameters(

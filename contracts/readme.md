@@ -13,3 +13,6 @@
 
 
 ####  (testnet- 每隔5分钟线性释放)PizzapadV3: 0xcFc7658d503B76995B9106216d2DEd39B8f80477      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000
+
+
+### B²主网合约: 0xf5738dd52946A582C11EDB0C8C34760407CeE8c5 (部署者私钥我会另外给到Gray)
