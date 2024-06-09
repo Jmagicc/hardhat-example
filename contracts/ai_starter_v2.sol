@@ -21,7 +21,7 @@ contract Pizzapad is Ownable, ReentrancyGuard {
     // public sale opening time
     uint256 public startTime;
     // endTime = startTime + dt; // IDO的结束时间 = 开始时间 + 持续时间
-    uint256 public dt = 39 * 3600;
+    uint256 public dt = 40 * 3600;
     // first claim = endtime + claimDt1 // 第一次领取时间 = 结束时间 + 第一次领取延迟
     uint256 public claimDt1;
 
