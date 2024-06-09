@@ -25,7 +25,7 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     uint256 public idoTimeRange = 40 * 3600;
     // firstClaimDt = endTime + claimDt, default 1 days after idoCloseTime;
     uint256 public claimDt = 24 * 3600;
-    // unlock token per day, 80 % in total 120 days
+    // unlock token per day, 80 % in total 365 days
     uint256 public claimPeriod = 24 * 3600;
     // max buy amount per user 99 BTC
     uint256 public maxAmountPerUser = 99000000000000000000;
@@ -225,10 +225,10 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     function getIDOUnlockRatio() public view returns (uint256) {
         if (block.timestamp < startTime + idoTimeRange + claimDt) return 0;
         if (block.timestamp < startTime + idoTimeRange + claimDt + claimPeriod) return 2000;
-        // unlock 80% in 120 days
+        // unlock 80% in 365 days
         uint256 period = (block.timestamp - startTime - idoTimeRange - claimDt) / claimPeriod;
-        if (period > 120) return 10000;
-        uint256 unlockRatio = 8000 * period / 120;
+        if (period > 365) return 10000;
+        uint256 unlockRatio = 8000 * period / 365;
         return 2000 + unlockRatio;
     }
 
@@ -313,11 +313,6 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
         claimPeriod = period;
     }
 
-    //setwhiteaddress true/false
-    function setbWhiteAddr(bool bWhiteAddr) external onlyOwner {
-        require(!idoStart, "Pizzapad: already Start!");
-        idoWhiteAddr = bWhiteAddr;
-    }
 
     receive() external payable {}
 
