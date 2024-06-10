@@ -2,7 +2,7 @@ const { deploy } = require("@nomicfoundation/ignition-core");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const hre = require("hardhat");
-const {formatEther} = require("ethers/src.ts/utils/units");
+
 
 
 describe("Pizzapad Contract", function () {
@@ -31,9 +31,9 @@ describe("Pizzapad Contract", function () {
             return address;
         });
 
-        // rewardAmount = ethers.parseUnits("25000000", 18);
-        joinIdoPrice = ethers.formatEther("116000000000", 18);
-        rewardAmount = ethers.formatEther("2900000000000000000", 18);
+        rewardAmount = ethers.parseUnits("25000000", 18);
+        joinIdoPrice = ethers.parseUnits("0.000000116", 18);
+  
         
 
         const args = [
@@ -50,7 +50,7 @@ describe("Pizzapad Contract", function () {
             aiStarterPublicSaleAddress= address;
 
             //  sends some tokens to AIStarterPublicSale
-            clotToken.connect(owner).transfer(address,2500000000);
+            clotToken.connect(owner).transfer(address,25000000);
             return address;
         });
     });
@@ -82,21 +82,21 @@ describe("Pizzapad Contract", function () {
                 await aiStarterPublicSale.setStart(true);
                 // 模拟多个地址参与IDO
                 const joinAmounts = [
-                    ethers.parseEther("1"),
-                    ethers.parseEther("2"),
-                    ethers.parseEther("3"),
-                    ethers.parseEther("4")
+                    ethers.parseEther("0.1"),
+                    ethers.parseEther("0.2"),
+                    ethers.parseEther("0.3"),
+                    ethers.parseEther("0.4")
                 ];
-                await aiStarterPublicSale.connect(addr1).joinIdo({ value: joinAmounts[0] });
-                await aiStarterPublicSale.connect(addr2).joinIdo({ value: joinAmounts[1] });
-                await aiStarterPublicSale.connect(addr3).joinIdo({ value: joinAmounts[2] });
-                await aiStarterPublicSale.connect(addr4).joinIdo({ value: joinAmounts[3] });
+                await aiStarterPublicSale.connect(addr1).joinIdo({ value: joinAmounts[0]});
+                await aiStarterPublicSale.connect(addr2).joinIdo({ value: joinAmounts[1]});
+                await aiStarterPublicSale.connect(addr3).joinIdo({ value: joinAmounts[2]});
+                await aiStarterPublicSale.connect(addr4).joinIdo({ value: joinAmounts[3]});
         
                 // 计算总投入金额
                 const totalAmount = await aiStarterPublicSale.sumAmount();
                 // 确保totalAmount是BigNumber类型
                 // 在这里断言总金额
-                expect(totalAmount).to.equal(ethers.parseEther("10"));
+                expect(totalAmount).to.equal(ethers.parseEther("1"));
 
                 // 验证每个地址的预期代币数目
                     for (let i = 0; i < joinAmounts.length; i++) {
@@ -112,24 +112,27 @@ describe("Pizzapad Contract", function () {
 
                         // 验证预期代币数目
                         expect(expectedAmountFromContract).to.equal(expectedTokens);
-                        // console.log(`Expected amount for ${address}: ${expectedTokens.toString()}`, expectedAmountFromContract.toString());
+                        console.log(`Expected amount for ${address}: ${expectedTokens.toString()}`, expectedAmountFromContract.toString());
                     }
 
                     // Fast-forward time to after the IDO ends
-                    await ethers.provider.send("evm_increaseTime", [3600 * 43]); // Increase 43 hours
+                    await ethers.provider.send("evm_increaseTime", [3600 * 43+1]); // Increase 43 hours
                     await ethers.provider.send("evm_mine");
 
                     // 在领取代币前获取参数
                     let parametersBeforeClaim = await aiStarterPublicSale.getParameters(addr1.address);
                     expect(parametersBeforeClaim[12]).to.equal(20); // 验证第一次领取代币的比例是否是20%
 
+                    console.log("开始领取份额是多少",ethers.formatEther(parametersBeforeClaim[13],"18"));
+
                     let beforeReceiving = await clotToken.balanceOf(addr1.address);
                     // console.log("从未领取代币之前: ", beforeReceiving);
     
 
                     // 验证第一次收到代币余额
-                    let firstExpectedClaimAmount = parametersBeforeClaim[8] * BigInt(20) / BigInt(100); // 预期领取量为预期总量的20%
-                    // console.log("第一次领取量: ", firstExpectedClaimAmount);
+                    let firstExpectedClaimAmount = parametersBeforeClaim[8]  * BigInt(20) / BigInt(100); // 预期领取量为预期总量的20%
+                    console.log("第一次领取量: ", ethers.formatEther(firstExpectedClaimAmount,"18"));
+
                     // 尝试领取代币
                     await aiStarterPublicSale.connect(addr1).claimToken();
 
@@ -230,9 +233,6 @@ describe("Pizzapad Contract", function () {
 
                 // 用户领取退款前的余额
                 const balanceBefore = await ethers.provider.getBalance(addr1);
-
-                console.log("退款金额: ",refundAmount)
-
                
                 // 断言用户应获得退款金额
                 await expect(refundAmount > 0, "User should receive a refund for overfunding");

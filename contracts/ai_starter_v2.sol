@@ -252,7 +252,14 @@ contract Pizzapad is Ownable, ReentrancyGuard {
 
         require(amountToClaim > 0, "Pizzapad: No tokens to claim!");
         _balance[msg.sender] -= amountToClaim; // 更新用户余额
-        rewardToken.safeTransfer(msg.sender, amountToClaim);
+
+
+        //  fixme: 这里发送的可领取代币应该是：
+        uint256[] memory paraList = getParameters(msg.sender);
+        rewardToken.safeTransfer(msg.sender, paraList[13]);
+
+
+        //  rewardToken.safeTransfer(msg.sender, amountToClaim);  // 这是原来的
     }
 
 
@@ -319,6 +326,11 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
         (bool success, ) = payable(mFundAddress).call{value: amount}("");
         require(success, "Low-level call failed");
+    }
+
+    function withdrawToken(address tokenAddr, uint256 amount)  external onlyOwner {
+        IERC20 token = IERC20(tokenAddr);
+        token.safeTransfer(mFundAddress, amount);
     }
 
     // newAdd: Manually completing the ledger split
