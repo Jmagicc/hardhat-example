@@ -23,9 +23,10 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     uint256 public startTime;
     // endTime = startTime + idoTimeRange, default endTime is  Jun 11,2024 12:00 UTC+8 : 1718078400
     // uint256 public idoTimeRange = 40 * 3600;
-    uint256 public idoTimeRange = 900;
+    uint256 public idoTimeRange = 1 * 3600;
     // firstClaimDt = endTime + claimDt, default 1 days after idoCloseTime;
-    uint256 public claimDt = 24 * 3600;
+    // uint256 public claimDt = 24 * 3600;
+    uint256 public claimDt = 1800;
     // unlock token per day, 80 % in total 365 days
     uint256 public claimPeriod = 24 * 3600;
     // max buy amount per user 99 BTC
