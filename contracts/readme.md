@@ -6,7 +6,7 @@
 
 ## B² testnet  already CLOTToken send rewardAmount-> Pizzapad   25000000000000000000000000
 ####  CLOTToken: 0xD6959700a7d9B170288533b1f447b3D044e229D0
-####  Pizzapad: 0x858c02a3D4f63B06f56c6AFf3F8A31A757fC9EE4      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000   
+####  Pizzapad: 0x2b626Dada36Ba6D62168556ff021c421ed31cA5C      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000   
 
 
 
