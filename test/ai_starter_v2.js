@@ -122,36 +122,55 @@ describe("Pizzapad Contract", function () {
 
                     // 在领取代币前获取参数
                     let parametersBeforeClaim = await aiStarterPublicSale.getParameters(addr1.address);
-                    expect(parametersBeforeClaim[12]).to.equal(20); // 验证第一次领取代币的比例是否是20%
-
-                    console.log("开始领取份额是多少",ethers.formatEther(parametersBeforeClaim[13],"18"));
-
+                    expect(parametersBeforeClaim[12]).to.equal(2000); // 验证第一次领取全部代币的比例是否是20%
+                    
+                    console.log("第1次领取代币的比例是多少",parametersBeforeClaim);
+                    console.log("第1次领取代币是多少",ethers.formatEther(parametersBeforeClaim[13],"18"));
                     let beforeReceiving = await clotToken.balanceOf(addr1.address);
-                    console.log("从未领取代币之前: ", beforeReceiving);
+                    console.log("从未领取代币之前的钱包余额: ", beforeReceiving);
     
-
                     // 验证第一次收到代币余额
-                    // let firstExpectedClaimAmount = parametersBeforeClaim[8] / 116000000000  //* BigInt(20) / BigInt(100); // 预期领取量为预期总量的20%
-                    // console.log("第一次领取量: ",  parametersBeforeClaim[8]);
                     let firstExpectedClaimAmount =parametersBeforeClaim[13]
 
-                    // 尝试领取代币
+                    // 尝试第一次领取代币
                     await aiStarterPublicSale.connect(addr1).claimToken();
                     
-                    console.log("第一次领取代币后的钱包余额是: ", await clotToken.balanceOf(addr1.address))
-                    expect(await clotToken.balanceOf(addr1.address)).to.equal(firstExpectedClaimAmount);
-
-                    // console.log("第一次领取代币后的钱包余额是: ", beforeReceiving+firstExpectedClaimAmount)
+                    console.log("第1次领取代币后的钱包余额是: ", await clotToken.balanceOf(addr1.address))
+                    expect(await clotToken.balanceOf(addr1.address)).to.equal(firstExpectedClaimAmount);  //断言收到的金额
 
                     // 快进到下一个领取周期
-                    // await ethers.provider.send("evm_increaseTime", [30 * 24 * 3600 + 1]); // 快进一个月
-                    // await ethers.provider.send("evm_mine");
+                    await ethers.provider.send("evm_increaseTime", [30 * 24 * 3600 + 1]); // 快进一个月
+                    await ethers.provider.send("evm_mine");
+
+
 
                     // 获取第二次领取前的参数
-                    // let parametersBeforeSecondClaim = await aiStarterPublicSale.getParameters(addr1.address);
+                    let parametersBeforeSecondClaim = await aiStarterPublicSale.getParameters(addr1.address);
+                    expect(parametersBeforeSecondClaim[12]).to.equal(2613); 
 
-                    // // 执行第二次领取代币
-                    // await aiStarterPublicSale.connect(addr1).claimToken();
+            
+                    console.log("第2次领取代币的比例是多少",parametersBeforeSecondClaim);
+                    console.log("第2次领取份额是多少",ethers.formatEther(parametersBeforeSecondClaim[13],"18"));
+
+                    //  执行第二次领取代币
+                    const claimNum2 = await aiStarterPublicSale.connect(addr1).claimTokenNum(addr1.address);
+                    await aiStarterPublicSale.connect(addr1).claimToken();
+
+                    console.log("第2次领取代币后的钱包余额是: ", await clotToken.balanceOf(addr1.address))
+                    expect(await clotToken.balanceOf(addr1.address)).to.equal(firstExpectedClaimAmount+(parametersBeforeSecondClaim[13]-claimNum2)); //断言收到的金额
+
+                     // 快进到下一个领取周期
+                    await ethers.provider.send("evm_increaseTime", [30 * 24 * 3600 + 1]); // 快进一个月
+                    await ethers.provider.send("evm_mine");
+ 
+
+                    // 第三次
+                    let parametersBeforeClaimThree = await aiStarterPublicSale.getParameters(addr1.address);
+                    expect(parametersBeforeClaimThree[12]).to.equal(3271); 
+                    console.log("第3次领取代币的比例是多少",parametersBeforeClaimThree);
+
+
+                
 
                     // // 验证第二次领取后的代币余额
                     // let afterSecondClaimBalance = await clotToken.balanceOf(addr1.address);

@@ -21,15 +21,13 @@ contract Pizzapad is Ownable, ReentrancyGuard {
     bool public mbStart;
     // public sale opening time
     uint256 public startTime;
-    // endTime = startTime + dt; // IDO的结束时间 = 开始时间 + 持续时间
+    // endTime = startTime + dt; 
     uint256 public dt = 40 * 3600;
-    // first claim = endtime + claimDt1 // 第一次领取时间 = 结束时间 + 第一次领取延迟
+    // first claim = endtime + claimDt1
     uint256 public claimDt1;
 
-    // 私募结束后三小时开启第一轮claim
-    uint256 public linearReleaseStartTime;
-    // 线性释放结束时间，从线性释放开始时间算起12个月
-    uint256 public linearReleaseEndTime = 12 * 30 days;
+    // unlock token per day, 80 % in total 365 days
+    uint256 public claimPeriod = 24 * 3600;
 
     // expect amount that user can get (will modify if over funded)
     mapping(address => uint256) private _balance;
@@ -40,6 +38,9 @@ contract Pizzapad is Ownable, ReentrancyGuard {
     uint256 private _sumCount;  // Total number of addresses
     uint256 public _lockedFunds; // newAdd: After the private placement is completed, lock in 20% of the funds for _sumAmount
     bool private divisionCompleted = false; // newAdd: Used to track whether the share is completed
+    // total claim amount
+    uint256 private totalClaimAmount;
+
 
 
     mapping(address => uint256) private _alreadyClaimNumArr;
@@ -54,8 +55,6 @@ contract Pizzapad is Ownable, ReentrancyGuard {
 
     event JoinIdoCoins(address indexed user, uint256 amount, uint256 id);
     address public mFundAddress;
-
-
 
 
     constructor(
@@ -142,7 +141,7 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         return (addrArr, joinIdoAmountArr, timeArr);
     }
 
-    //get account amount (if over-funded then modify the amount)  他在20w美金中只要出ExpectedAmount,如果多的要退还给他
+    //get account amount (if over-funded then modify the amount)
     function getExpectedAmount(address account) public view returns (uint256) {
         uint256 ExpectedAmount = _balance[account];
         if (ExpectedAmount == 0) return ExpectedAmount;
@@ -151,6 +150,18 @@ contract Pizzapad is Ownable, ReentrancyGuard {
             ExpectedAmount = (rewardAmount * (ExpectedAmount)) / (_sumAmount);
         }
         return ExpectedAmount;
+    }
+
+
+    // get unlock Ratio
+    function getIDOUnlockRatio() public view returns (uint256) {
+        if (block.timestamp < startTime + claimDt1) return 0;
+        if (block.timestamp < startTime + claimDt1 + claimPeriod) return 2000;
+        // unlock 80% in 365 days
+        uint256 period = (block.timestamp - startTime - dt - claimDt1) / claimPeriod;
+        if (period > 365) return 10000;
+        uint256 unlockRatio = 8000 * period / 365;
+        return 2000 + unlockRatio;
     }
 
 
@@ -173,25 +184,14 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         paraList[9] = refundAmount; // refund Amount
         paraList[10] = _alreadyClaimNumArr[account]; // Claim num
         paraList[11] = _bClaimBTC[account] ? 1 : 0; // is Claim BTC
+  
+        uint256 coe = getIDOUnlockRatio();
+        expectedAmount = (expectedAmount * (coe)) / 10000;
+        expectedAmount = (expectedAmount * 10**18) / joinIdoPrice;
+        paraList[12] = coe; //can claim ratio
+        paraList[13] = expectedAmount; //can claim amount
+        paraList[14] = totalClaimAmount; //total claim amount
 
-        uint256 coe; // can claim ratio
-        if (block.timestamp > linearReleaseStartTime) {
-            if (_alreadyClaimNumArr[account] == 0) {
-                coe = 20;
-            } else {
-                uint256 monthsPassed = (block.timestamp - linearReleaseStartTime) / 30 days;
-                uint256 totalReleasablePercentage = 20 + 80 * monthsPassed / 12;
-                coe = totalReleasablePercentage > 100 ? 100 : totalReleasablePercentage;
-            }
-        }
-        paraList[12] = coe; // can claim ratio
-
-        uint256 canClaimAmount;
-        if (coe > 0) {
-            uint256 totalReleasable = expectedAmount * coe / 100;
-            canClaimAmount = totalReleasable * (10**18) / joinIdoPrice;
-        }
-        paraList[13] = canClaimAmount; // can claim amount
         return paraList;
     }
 
@@ -233,37 +233,23 @@ contract Pizzapad is Ownable, ReentrancyGuard {
             block.timestamp > startTime + claimDt1,
             "Pizzapad: need begin claim!"
         );
-        uint256 totalExpectedAmount = getExpectedAmount(msg.sender);
-        uint256 amountToClaim = 0;
-        // 第一轮领取逻辑
-        if (_alreadyClaimNumArr[msg.sender] == 0 && block.timestamp > linearReleaseStartTime) {
-            // 如果是第一次领取，并且当前时间大于线性释放开始时间
-//            amountToClaim = (totalExpectedAmount) / joinIdoPrice;
-//            amountToClaim = totalExpectedAmount * 20 / 100; // 释放20%
-            uint256[] memory paraList   = getParameters(msg.sender);
-            amountToClaim = paraList[13];
-            _alreadyClaimNumArr[msg.sender] = 1;
-        }
-            // 线性释放逻辑
-        else if (_alreadyClaimNumArr[msg.sender] >= 1 && block.timestamp <= linearReleaseEndTime) {
-            // 如果不是第一次领取，并且当前时间小于等于线性释放结束时间
-            uint256 monthsPassed = (block.timestamp - linearReleaseStartTime) / 30 days;
-            // 计算应该释放的总量
-            totalExpectedAmount = (totalExpectedAmount) / joinIdoPrice;
-            uint256 totalReleasable = totalExpectedAmount * (20 + 80 * monthsPassed / 12) / 100;
-            // 减去已经领取的数量
-            amountToClaim = totalReleasable - (totalExpectedAmount - _balance[msg.sender]);
+        uint256 coe = getIDOUnlockRatio();
 
-            _alreadyClaimNumArr[msg.sender] = monthsPassed + 1; // 更新已领取次数
-        }
+        require(coe > 0, "Pizzapad: claim 0!");
 
-        require(amountToClaim > 0, "Pizzapad: No tokens to claim!");
-//        _balance[msg.sender] -= amountToClaim; // 更新用户余额
+        uint256[] memory paraList =getParameters(msg.sender);
+        uint256 canClaimAmount = paraList[13];
 
-
-         rewardToken.safeTransfer(msg.sender, amountToClaim);  // 这是原来的
+        require(
+            canClaimAmount > _alreadyClaimNumArr[msg.sender],
+            "Pizzapad: no token to be claimed!"
+        );
+        canClaimAmount -= _alreadyClaimNumArr[msg.sender];
+        if (canClaimAmount > 0)
+            rewardToken.safeTransfer(msg.sender, canClaimAmount);
+        _alreadyClaimNumArr[msg.sender] += canClaimAmount;
+        totalClaimAmount += canClaimAmount;
     }
-
 
 
     //claim btc
@@ -301,39 +287,23 @@ contract Pizzapad is Ownable, ReentrancyGuard {
     function setStart(bool bstart) external onlyOwner {
         mbStart = bstart;
         startTime = block.timestamp;
-          // 设置线性释放的开始时间为私募结束后三小时
-        linearReleaseStartTime = startTime + dt + 3 * 3600;
-        // 设置线性释放的结束时间
-        linearReleaseEndTime = linearReleaseStartTime + linearReleaseEndTime;
     }
 
     // set Time
     function setDt(
         uint256 tDt,
-        uint256 tDt1
+        uint256 tDt1,
+        uint256 period
     ) external onlyOwner {
         dt = tDt;
         claimDt1 = tDt1;
-        // 设置线性释放的开始时间为私募结束后三小时
-        linearReleaseStartTime = startTime + dt + 3 * 3600;
-        // 设置线性释放的结束时间
-        linearReleaseEndTime = linearReleaseStartTime + linearReleaseEndTime;
+        claimPeriod = period;
+        
     }
+
 
     receive() external payable {}
 
-
-    // fixme:Exclusion from CompleteDivision
-    function withdraw(uint256 amount) external {
-        require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
-        (bool success, ) = payable(mFundAddress).call{value: amount}("");
-        require(success, "Low-level call failed");
-    }
-
-    function withdrawToken(address tokenAddr, uint256 amount)  external onlyOwner {
-        IERC20 token = IERC20(tokenAddr);
-        token.safeTransfer(mFundAddress, amount);
-    }
 
     // newAdd: Manually completing the ledger split
     function CompleteDivision() external onlyOwner {
@@ -360,12 +330,16 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         _lockedFunds = 0;
     }
 
-    // function withdrawToken(address tokenAddr, uint256 amount)
-    // external
-    // onlyOwner
-    // {
-    //     IERC20 token = IERC20(tokenAddr);
-    //     token.safeTransfer(mFundAddress, amount);
-    // }
+    // fixme:Exclusion from CompleteDivision
+    function withdraw(uint256 amount) external {
+        require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
+        (bool success, ) = payable(mFundAddress).call{value: amount}("");
+        require(success, "Low-level call failed");
+    }
+
+    function withdrawToken(address tokenAddr, uint256 amount) external onlyOwner{
+        IERC20 token = IERC20(tokenAddr);
+        token.safeTransfer(mFundAddress, amount);
+    }
 }
 
