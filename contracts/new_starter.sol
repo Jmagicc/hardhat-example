@@ -14,8 +14,8 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     // IDO token price : 0.000000116 BTC, 116000000000
     uint256 public joinIdoPrice = 116000000000;
 //     max token Amount for IDO , 2.1750 BTC , 2175000000000000000
-//    uint256 public rewardBTCAmount= 2900000000000000000;
-    uint256 public rewardBTCAmount= 100000000000000000; // 0.1 BTC
+    uint256 public rewardBTCAmount= 2900000000000000000;
+//    uint256 public rewardBTCAmount= 100000000000000000; // 0.1 BTC
     // default false
     bool public idoStart;
     // default no whitelist
@@ -23,8 +23,8 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     // public sale opening time Jun 9,2024 20:00 UTC+8 : 1717934400
     uint256 public startTime;
     // endTime = startTime + idoTimeRange, default endTime is  Jun 11,2024 12:00 UTC+8 : 1718078400
-    //    uint256 public idoTimeRange = 40 * 3600;
-    uint256 public idoTimeRange = 1 * 3600;
+    uint256 public idoTimeRange = 40 * 3600;
+//    uint256 public idoTimeRange = 1 * 3600;
     // firstClaimDt = endTime + claimDt, default 1 days after idoCloseTime;
     // uint256 public claimDt = 24 * 3600;
     uint256 public claimDt = 1800;

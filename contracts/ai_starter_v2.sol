@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "hardhat/console.sol";
 
 contract Pizzapad is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -141,7 +142,7 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         return (addrArr, joinIdoAmountArr, timeArr);
     }
 
-    //get account amount (if over-funded then modify the amount)
+    //get account amount (if over-funded then modify the amount)  他在20w美金中只要出ExpectedAmount,如果多的要退还给他
     function getExpectedAmount(address account) public view returns (uint256) {
         uint256 ExpectedAmount = _balance[account];
         if (ExpectedAmount == 0) return ExpectedAmount;
@@ -151,6 +152,8 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         }
         return ExpectedAmount;
     }
+
+
 
     // get all parameters associated with account
     function getParameters(address account)public view returns (uint256[] memory) {
@@ -232,11 +235,13 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         );
         uint256 totalExpectedAmount = getExpectedAmount(msg.sender);
         uint256 amountToClaim = 0;
-
         // 第一轮领取逻辑
         if (_alreadyClaimNumArr[msg.sender] == 0 && block.timestamp > linearReleaseStartTime) {
             // 如果是第一次领取，并且当前时间大于线性释放开始时间
-            amountToClaim = totalExpectedAmount * 20 / 100; // 释放20%
+//            amountToClaim = (totalExpectedAmount) / joinIdoPrice;
+//            amountToClaim = totalExpectedAmount * 20 / 100; // 释放20%
+            uint256[] memory paraList   = getParameters(msg.sender);
+            amountToClaim = paraList[13];
             _alreadyClaimNumArr[msg.sender] = 1;
         }
             // 线性释放逻辑
@@ -244,22 +249,19 @@ contract Pizzapad is Ownable, ReentrancyGuard {
             // 如果不是第一次领取，并且当前时间小于等于线性释放结束时间
             uint256 monthsPassed = (block.timestamp - linearReleaseStartTime) / 30 days;
             // 计算应该释放的总量
+            totalExpectedAmount = (totalExpectedAmount) / joinIdoPrice;
             uint256 totalReleasable = totalExpectedAmount * (20 + 80 * monthsPassed / 12) / 100;
             // 减去已经领取的数量
             amountToClaim = totalReleasable - (totalExpectedAmount - _balance[msg.sender]);
+
             _alreadyClaimNumArr[msg.sender] = monthsPassed + 1; // 更新已领取次数
         }
 
         require(amountToClaim > 0, "Pizzapad: No tokens to claim!");
-        _balance[msg.sender] -= amountToClaim; // 更新用户余额
+//        _balance[msg.sender] -= amountToClaim; // 更新用户余额
 
 
-        //  fixme: 这里发送的可领取代币应该是：
-        uint256[] memory paraList = getParameters(msg.sender);
-        rewardToken.safeTransfer(msg.sender, paraList[13]);
-
-
-        //  rewardToken.safeTransfer(msg.sender, amountToClaim);  // 这是原来的
+         rewardToken.safeTransfer(msg.sender, amountToClaim);  // 这是原来的
     }
 
 
@@ -358,12 +360,12 @@ contract Pizzapad is Ownable, ReentrancyGuard {
         _lockedFunds = 0;
     }
 
-    function withdrawToken(address tokenAddr, uint256 amount)
-    external
-    onlyOwner
-    {
-        IERC20 token = IERC20(tokenAddr);
-        token.safeTransfer(mFundAddress, amount);
-    }
+    // function withdrawToken(address tokenAddr, uint256 amount)
+    // external
+    // onlyOwner
+    // {
+    //     IERC20 token = IERC20(tokenAddr);
+    //     token.safeTransfer(mFundAddress, amount);
+    // }
 }
 
