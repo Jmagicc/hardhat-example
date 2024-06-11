@@ -6,13 +6,13 @@
 
 ## B² testnet  already CLOTToken send rewardAmount-> Pizzapad   25000000000000000000000000
 ####  CLOTToken: 0xD6959700a7d9B170288533b1f447b3D044e229D0
-####  Pizzapad: 0xBcB4A2Db6628D489Be5d66684F1eA1a9F67958D1      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000   
+####  Pizzapad: 0x858c02a3D4f63B06f56c6AFf3F8A31A757fC9EE4      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000   
 
 
 
 
 
-####  (testnet- 每隔5分钟线性释放)PizzapadV3: 0xcFc7658d503B76995B9106216d2DEd39B8f80477      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000
+[//]: # (####  &#40;testnet- 每隔5分钟线性释放&#41;PizzapadV3: 0xcFc7658d503B76995B9106216d2DEd39B8f80477      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000)
 
 
 ### B²主网合约: 0x483371489f0cBea9a717630F469515dD6D169Ebb (部署者私钥我会另外给到Gray)
