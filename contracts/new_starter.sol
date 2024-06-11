@@ -14,7 +14,8 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     // IDO token price : 0.000000116 BTC, 116000000000
     uint256 public joinIdoPrice = 116000000000;
     // max token Amount for IDO , 2.1750 BTC , 2175000000000000000
-    uint256 public rewardBTCAmount= 2900000000000000000;
+//    uint256 public rewardBTCAmount= 2900000000000000000;
+    uint256 public rewardBTCAmount= 100000000000000000; // 0.1 BTC
     // default false
     bool public idoStart;
     // default no whitelist
