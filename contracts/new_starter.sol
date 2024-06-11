@@ -22,7 +22,8 @@ contract PizzapadV2 is Ownable, ReentrancyGuard {
     // public sale opening time Jun 9,2024 20:00 UTC+8 : 1717934400
     uint256 public startTime;
     // endTime = startTime + idoTimeRange, default endTime is  Jun 11,2024 12:00 UTC+8 : 1718078400
-    uint256 public idoTimeRange = 40 * 3600;
+    // uint256 public idoTimeRange = 40 * 3600;
+    uint256 public idoTimeRange = 900;
     // firstClaimDt = endTime + claimDt, default 1 days after idoCloseTime;
     uint256 public claimDt = 24 * 3600;
     // unlock token per day, 80 % in total 365 days
