@@ -66,3 +66,4 @@ module.exports = { getProofForAddress,getRootHash };
 
 // B²  mainnet
 // DAP_NFT: 0x3FdaCd1C4fCbF43568C5f3d9E674aE9C9ba30847
+// IDO: 0x483371489f0cBea9a717630F469515dD6D169Ebb

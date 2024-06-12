@@ -195,11 +195,21 @@ describe("Pizzapad Contract", function () {
             it("2.1 Allows user to claim BTC if overfunded", async function () {
                 // 前置条件：用户参与IDO并且IDO结束
                 await aiStarterPublicSale.setStart(true);
-                await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("10") });
-                await ethers.provider.send("evm_increaseTime", [3600 * 43]); // 快进使IDO结束
+                await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("10") }); // 只募资2.9, 剩余的会退回
+                // await aiStarterPublicSale.connect(addr2).joinIdo({ value: ethers.parseEther("10") }); // 只募资2.9, 剩余的会退回
+                await ethers.provider.send("evm_increaseTime", [3600 * 53]); // 快进使IDO结束 43小时
                 await ethers.provider.send("evm_mine");
+                const addr1Balance=await aiStarterPublicSale.balanceof(addr1.address)
+                console.log("IDO结束",addr1Balance);  
+
+                let parametersBeforeClaimBTC = await aiStarterPublicSale.getParameters(addr1.address);
+                console.log("用户参与IDO后参数: ", parametersBeforeClaimBTC);
+                // expect(parametersBeforeClaimBTC[9]).to.equal(ethers.parseEther("7.1"));
                 // 用户尝试领取BTC
                 await expect(aiStarterPublicSale.connect(addr1).claimBTC())
+
+                const addr1Balance2=await aiStarterPublicSale.balanceof(addr1.address)
+                console.log("领取BTC结束",addr1Balance2);  
         
                 // 验证用户不能二次领取BTC
                 await expect(aiStarterPublicSale.connect(addr1).claimBTC()).to.be.reverted;
