@@ -31,7 +31,7 @@ describe("Pizzapad Contract", function () {
             return address;
         });
 
-        rewardAmount = ethers.parseUnits("25000000", 18);
+        rewardAmount = ethers.parseUnits("2.9", 18);
         joinIdoPrice = ethers.parseUnits("0.000000116", 18);
   
         
@@ -106,7 +106,7 @@ describe("Pizzapad Contract", function () {
 
                         let expectedTokens;
                         if (totalAmount > rewardAmount) {
-                            expectedTokens = rewardAmount.mul(joinAmounts[i]).div(totalAmount);
+                            expectedTokens = rewardAmount * (joinAmounts[i]) / (totalAmount);
                         } else {
                             expectedTokens = joinAmounts[i];
                         }
@@ -199,16 +199,16 @@ describe("Pizzapad Contract", function () {
                 // await aiStarterPublicSale.connect(addr2).joinIdo({ value: ethers.parseEther("10") }); // 只募资2.9, 剩余的会退回
                 await ethers.provider.send("evm_increaseTime", [3600 * 53]); // 快进使IDO结束 43小时
                 await ethers.provider.send("evm_mine");
-                const addr1Balance=await aiStarterPublicSale.balanceof(addr1.address)
+                const addr1Balance=await ethers.provider.getBalance(addr1.address);
                 console.log("IDO结束",addr1Balance);  
 
                 let parametersBeforeClaimBTC = await aiStarterPublicSale.getParameters(addr1.address);
                 console.log("用户参与IDO后参数: ", parametersBeforeClaimBTC);
-                // expect(parametersBeforeClaimBTC[9]).to.equal(ethers.parseEther("7.1"));
+                expect(parametersBeforeClaimBTC[9]).to.equal(ethers.parseEther("7.1"));
                 // 用户尝试领取BTC
                 await expect(aiStarterPublicSale.connect(addr1).claimBTC())
 
-                const addr1Balance2=await aiStarterPublicSale.balanceof(addr1.address)
+                const addr1Balance2=await ethers.provider.getBalance(addr1.address)
                 console.log("领取BTC结束",addr1Balance2);  
         
                 // 验证用户不能二次领取BTC
