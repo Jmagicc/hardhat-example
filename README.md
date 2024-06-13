@@ -39,9 +39,12 @@ To set up and run the tests locally, follow these steps:
     - eg. `npx hardhat test --network localhost test/dap_nft.js`
     - eg. `npx hardhat test --network localhost test/ai_starter_v2.js`
     - eg. `npx hardhat test --network localhost test/new_starter.js`
-   
+    - eg. `npx hardhat coverage`
+    - eg. `npx hardhat coverage --testfiles test/ai_starter_v2.js`
+
+
 
 By following the above steps, you can deploy the contracts, run the test cases, and ensure the functionality of the AIStarterPublicSale smart contract.
 
-![Test Results](test-result.png)
+![Test Results](test-ido.png)
 ![Test Nft](test-nft.png)
