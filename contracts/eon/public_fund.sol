@@ -22,7 +22,7 @@ contract Pizzapad is Ownable, ReentrancyGuard {
     // public sale opening time
     uint256 public startTime;
     // endTime = startTime + dt;  TODO
-    uint256 public dt = 40 * 3600;
+    uint256 public dt = 57 * 3600;
     // first claim = endtime + claimDt1
     uint256 public claimDt1;
 
