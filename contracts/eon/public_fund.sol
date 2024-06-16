@@ -7,27 +7,30 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "hardhat/console.sol";
 
 contract PubPizzapad is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     // IDO token address
     IERC20 public rewardToken;
-    // IDO token price
-    uint256 public joinIdoPrice;
-    // max token Amount for IDO
-    uint256 public rewardAmount;
+    // IDO token price: joinIdoPrice:  757500000000  (0.0000007575 btc)
+    uint256 public joinIdoPrice = 757500000000;
+    // max token Amount for IDO: 2272500000000000000 (2.2725 btc) TODO
+    uint256 public rewardAmount= 2272500000000000000;
     // default false
     bool public mbStart;
     // public sale opening time
     uint256 public startTime;
-    // endTime = startTime + dt;  TODO
+    // endTime = startTime + dt; TODO
     uint256 public dt = 57 * 3600;
+
+    uint256 public endTimeAfterClaim=  3 * 3600;
     // first claim = endtime + claimDt1
     uint256 public claimDt1;
 
     // unlock token per day, 50 % in total 180 days
     uint256 public claimPeriod = 24 * 3600;
+    // max buy amount per user 99 BTC
+    uint256 public maxAmountPerUser = 99000000000000000000;
 
     // expect amount that user can get (will modify if over funded)
     mapping(address => uint256) private _balance;
@@ -57,15 +60,10 @@ contract PubPizzapad is Ownable, ReentrancyGuard {
 
     constructor(
         address _rewardToken,
-        uint256 _joinIdoPrice,
-        uint256 _rewardAmount,
         address _mFundAddress
     ) Ownable(msg.sender){
-        joinIdoPrice = _joinIdoPrice;
-        rewardAmount = _rewardAmount;
         // default claim time can be modify if needed
-        claimDt1 = dt + 3 * 3600;
-
+        claimDt1 = dt + endTimeAfterClaim;
 
         rewardToken = IERC20(_rewardToken);
         mFundAddress = _mFundAddress;
@@ -202,6 +200,10 @@ contract PubPizzapad is Ownable, ReentrancyGuard {
         );
 
         require(10**8 <= msg.value, "Pizzapad:value sent is too small");
+        require(
+            _balance[msg.sender] + msg.value <= maxAmountPerUser,
+            "Pizzapad:over maxAmountPerUser"
+        );
         uint256 amount = msg.value;
 
         if (_balance[msg.sender] == 0) {
@@ -301,8 +303,7 @@ contract PubPizzapad is Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    function withdraw(uint256 amount) external {
-        require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
+  function withdraw(uint256 amount) external onlyOwner {
         (bool success, ) = payable(mFundAddress).call{value: amount}("");
         require(success, "Low-level call failed");
     }

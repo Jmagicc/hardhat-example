@@ -11,13 +11,19 @@
 
 
 
-## B² testnet  already eonToken send rewardAmount-> PriFund   1100000000000000000000000
+## B² testnet  already eonToken send rewardAmount-> PriFund    1100000000000000000000000
 ####  eonToken: 0x22ADa3eb7C4c9BAfF3eaBC3d1a14EB0ed146C85E
-####  PriFund: 0x91D796a3a41aAeFAfD3b374eCbC37A482F3038f9      joinIdoPrice: 757500000000   rewardAmount:757500000000000000
+####  PriFund: 0xe6a46F8818Cd34731c98F83Cd903a9E4AB6edF67      joinIdoPrice: 757500000000   rewardAmount:757500000000000000
 
+
+
+## B² testnet  already eonToken send rewardAmount-> PubFund    3000000000000000000000000
+####  eonToken: 0x22ADa3eb7C4c9BAfF3eaBC3d1a14EB0ed146C85E
+####  PubFund: 0x1db227f5ff0F3214a084781F743d677a08e3cc16      joinIdoPrice: 757500000000   rewardAmount:2272500000000000000
 
 
 
 
 ### B²主网Pizza pad合约: 0x483371489f0cBea9a717630F469515dD6D169Ebb (部署者私钥我会另外给到Gray)
-### B² 私募合约: 0x7efA6edBE386dB72bEfae56E0C0166E23Dfe29a2
+### B²主网 私募合约: 
+### B²公募 私募合约: 

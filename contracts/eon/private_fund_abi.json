@@ -7,16 +7,6 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_joinIdoPrice",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_rewardAmount",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
         "name": "_mFundAddress",
         "type": "address"

@@ -13,16 +13,16 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     // IDO token address
     IERC20 public rewardToken;
-    // IDO token price
-    uint256 public joinIdoPrice;
-    // max token Amount for IDO
-    uint256 public rewardAmount;
+    // IDO token price: joinIdoPrice:  757500000000  (0.0000007575 btc)
+    uint256 public joinIdoPrice = 757500000000;
+    // max token Amount for IDO: 757500000000000000 (0.7575 btc)
+    uint256 public rewardAmount= 757500000000000000;
     // default false
     bool public mbStart;
     // public sale opening time
     uint256 public startTime;
     // endTime = startTime + dt;
-    uint256 public dt = 20 * 3600;
+    uint256 public dt = 57 * 3600;
 
     uint256 public endTimeAfterClaim=  3 * 3600;
     // first claim = endtime + claimDt1
@@ -65,16 +65,11 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
 
     constructor(
         address _rewardToken,
-        uint256 _joinIdoPrice,
-        uint256 _rewardAmount,
         address _mFundAddress,
         bytes32 _root
     ) Ownable(msg.sender){
-        joinIdoPrice = _joinIdoPrice;
-        rewardAmount = _rewardAmount;
         // default claim time can be modify if needed
         claimDt1 = dt + endTimeAfterClaim;
-
 
         rewardToken = IERC20(_rewardToken);
         mFundAddress = _mFundAddress;
@@ -336,8 +331,7 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    function withdraw(uint256 amount) external {
-        require(msg.sender == mFundAddress, "Pizzapad: not mFundAddress");
+    function withdraw(uint256 amount) external onlyOwner {
         (bool success, ) = payable(mFundAddress).call{value: amount}("");
         require(success, "Low-level call failed");
     }

@@ -7,16 +7,6 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "_joinIdoPrice",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_rewardAmount",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
         "name": "_mFundAddress",
         "type": "address"
@@ -258,6 +248,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "endTimeAfterClaim",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -399,6 +402,19 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxAmountPerUser",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
