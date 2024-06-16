@@ -5,19 +5,19 @@ const { log } = require('console');
 
 
 // const jsonString = fs.readFileSync('./whiteList.json', 'utf8');
-const jsonString = fs.readFileSync('./merkel/hardhat_dev_account.json', 'utf8');
-const WhiteList = JSON.parse(jsonString);
-const leaves = WhiteList.map((x) => keccak256(x));
-const merkleTree = new MerkleTree(leaves, keccak256, { sortPairs: true });
-const rootHash = '0x' + merkleTree.getRoot().toString('hex');
-const testAddress = '0x7A9367e4C7ddFCaCa96DB65bae68F1d267299A6C';  //example
-const leaf = keccak256(testAddress);
-const proof = merkleTree.getHexProof(leaf);
-const isWhiteList = merkleTree.verify(proof, leaf, rootHash);
+// const jsonString = fs.readFileSync('./merkel/hardhat_dev_account.json', 'utf8');
+// const WhiteList = JSON.parse(jsonString);
+// const leaves = WhiteList.map((x) => keccak256(x));
+// const merkleTree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+// const rootHash = '0x' + merkleTree.getRoot().toString('hex');
+// const testAddress = '0x7A9367e4C7ddFCaCa96DB65bae68F1d267299A6C';  //example
+// const leaf = keccak256(testAddress);
+// const proof = merkleTree.getHexProof(leaf);
+// const isWhiteList = merkleTree.verify(proof, leaf, rootHash);
 
-console.log('rootHash:: ', rootHash);
-console.log('proof:: ', proof);  // Contract input, double quotes instead of single quotes
-console.log('verify:: ', isWhiteList);
+// console.log('rootHash:: ', rootHash);
+// console.log('proof:: ', proof);  // Contract input, double quotes instead of single quotes
+// console.log('verify:: ', isWhiteList);
 
 // 0xbadffe5799a1044a9ada03bcc0df25f3e0bd44a0d17fa1b2caa98a3e86eac8f5
 // rootHash::  0xdff7a01af376abaa117ac57da22baa08186ac496092f361dac874c415e830105

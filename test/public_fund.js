@@ -32,15 +32,13 @@ describe("Pizzapad Contract", function () {
             return address;
         });
 
-        rewardAmount = ethers.parseUnits("2.9", 18);
-        joinIdoPrice = ethers.parseUnits("0.000000116", 18);
+        rewardAmount = ethers.parseUnits("2.2725", 18);
+        // joinIdoPrice = ethers.parseUnits("0.000000116", 18);
   
         
 
         const args = [
             rewardTokenAddress,
-            joinIdoPrice,
-            rewardAmount,
             mFundAddress,
         ];
         const AIStarterPublicSale = await hre.ethers.getContractFactory("PubPizzapad");
@@ -199,7 +197,7 @@ describe("Pizzapad Contract", function () {
 
                 let parametersBeforeClaimBTC = await aiStarterPublicSale.getParameters(addr1.address);
                 // console.log("用户参与IDO后参数: ", parametersBeforeClaimBTC);
-                expect(parametersBeforeClaimBTC[9]).to.equal(ethers.parseEther("7.1"));
+                expect(parametersBeforeClaimBTC[9]).to.equal(ethers.parseEther("7.7275"));
                 // 用户尝试领取BTC
                 await expect(aiStarterPublicSale.connect(addr1).claimBTC())
 
@@ -245,7 +243,7 @@ describe("Pizzapad Contract", function () {
                 // 开启 IDO
                 await aiStarterPublicSale.setStart(true);
                 // 用户参与 IDO 
-                await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("1100") });
+                await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("3") });
                 // await aiStarterPublicSale.connect(addr2).joinIdo({ value: ethers.parseEther("200") });
                 // await aiStarterPublicSale.connect(addr3).joinIdo({ value: ethers.parseEther("200") });
                 
@@ -465,13 +463,13 @@ describe("Pizzapad Contract", function () {
 
                 it("9.2 Should allow withdrawal by mFundAddress", async function () {
                     await aiStarterPublicSale.setStart(true);
-                    await aiStarterPublicSale.connect(addr1).joinIdo({ value: ethers.parseEther("10") }); // 只募资2.9, 剩余的会退回
-                    await ethers.provider.send("evm_increaseTime", [3600 * 53]); // 快进使IDO结束 43小时
+                    await aiStarterPublicSale.connect(owner).joinIdo({ value: ethers.parseEther("10") }); // 只募资2.9, 剩余的会退回
+                    await ethers.provider.send("evm_increaseTime", [3600 * 61]); // 快进使IDO结束 61小时
                     await ethers.provider.send("evm_mine");
-                    const addr1Balance=await ethers.provider.getBalance(addr1.address);
-                    await aiStarterPublicSale.connect(addr1).withdraw(ethers.parseUnits("1", 18));
-                    const addr1Balance2=await ethers.provider.getBalance(addr1.address);
-                    expect(addr1Balance2).to.be.gt(addr1Balance);
+                    const addr1Balance=await ethers.provider.getBalance(owner.address);
+                    await aiStarterPublicSale.connect(owner).withdraw(ethers.parseUnits("1", 18));
+                    const addr1Balance2=await ethers.provider.getBalance(owner.address);
+                    expect(addr1Balance).to.be.gt(addr1Balance2);
 
                 });
             });

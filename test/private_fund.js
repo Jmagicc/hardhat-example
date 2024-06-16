@@ -36,15 +36,13 @@ describe("PriPizzapad Contract", function () {
         const root = getRootHash(); 
         distributionRoot= root;
 
-        rewardAmount = ethers.parseUnits("2.9", 18);
-        joinIdoPrice = ethers.parseUnits("0.000000116", 18);
+        // rewardAmount = ethers.parseUnits("2.9", 18);
+        // joinIdoPrice = ethers.parseUnits("0.000000116", 18);
 
 
 
         const args = [
             rewardTokenAddress,
-            joinIdoPrice,
-            rewardAmount,
             mFundAddress,
             distributionRoot
         ];
@@ -95,6 +93,34 @@ describe("PriPizzapad Contract", function () {
             // 如果投入的金额不符合要求呢
             await expect(aiStarterPublicSale.connect(owner).joinIdo(proof2,{ value: ethers.parseUnits("1", 18) }))
                 .to.be.revertedWith("Pizzapad: Exceeding the allowed amount of participation");
+
+            await ethers.provider.send("evm_increaseTime", [3600 * 59]);
+            await ethers.provider.send("evm_mine");
+            const parameters3 = await aiStarterPublicSale.connect(owner).getParameters(owner.address);
+            const ratio = await aiStarterPublicSale.connect(owner).getIDOUnlockRatio()
+            console.log("parameters:",parameters3[12]);
+            console.log("ratio:",ratio);
+            expect(parameters3[12]).to.equal(0);
+            expect(ratio).to.equal(0);
+
+            await ethers.provider.send("evm_increaseTime", [3600 * 2]);
+            await ethers.provider.send("evm_mine");
+            const parameters4 = await aiStarterPublicSale.connect(owner).getParameters(owner.address);
+            const ratio2 = await aiStarterPublicSale.connect(owner).getIDOUnlockRatio()
+            console.log("parameters:",parameters4[12]);
+            console.log("ratio:",ratio2);
+            expect(parameters4[12]).to.equal(5000);
+            expect(ratio2).to.equal(5000);
+
+            await ethers.provider.send("evm_increaseTime", [3600 * 24 * 30]);
+            await ethers.provider.send("evm_mine");
+
+            const parameters5 = await aiStarterPublicSale.connect(owner).getParameters(owner.address);
+            const ratio3 = await aiStarterPublicSale.connect(owner).getIDOUnlockRatio()
+
+            expect(parameters5[12]).to.equal(5750);
+            expect(ratio3).to.equal(5750);
+            
         });
         it("1.2 Multiple addresses join IDO and verify the expected number of tokens for each address, and at the end claim the proportion of tokens released linearly in the first round and mock", async function () {
             // 开启IDO
@@ -143,7 +169,7 @@ describe("PriPizzapad Contract", function () {
             }
 
             // Fast-forward time to after the IDO ends
-            await ethers.provider.send("evm_increaseTime", [3600 * 43+1]); // Increase 43 hours
+            await ethers.provider.send("evm_increaseTime", [3600 * 61]); // Increase 61 hours
             await ethers.provider.send("evm_mine");
 
             // 在领取代币前获取参数
@@ -172,11 +198,11 @@ describe("PriPizzapad Contract", function () {
 
             // 获取第二次领取前的参数
             let parametersBeforeSecondClaim = await aiStarterPublicSale.getParameters(addr1.address);
-            expect(parametersBeforeSecondClaim[12]).to.equal(5833);
+            expect(parametersBeforeSecondClaim[12]).to.equal(5750);
 
             // 查看比例
             const unlockRatio =  await aiStarterPublicSale.getIDOUnlockRatio();
-            expect(unlockRatio).to.equal(5833);
+            expect(unlockRatio).to.equal(5750);
 
 
             // console.log("第2次领取代币的比例是多少",parametersBeforeSecondClaim);
@@ -196,7 +222,7 @@ describe("PriPizzapad Contract", function () {
 
             // 第三次
             let parametersBeforeClaimThree = await aiStarterPublicSale.getParameters(addr1.address);
-            expect(parametersBeforeClaimThree[12]).to.equal(6666);
+            expect(parametersBeforeClaimThree[12]).to.equal(6583);
             // console.log("第3次领取代币的比例是多少",parametersBeforeClaimThree);
 
 
@@ -270,7 +296,7 @@ describe("PriPizzapad Contract", function () {
             // await aiStarterPublicSale.connect(addr3).joinIdo({ value: ethers.parseEther("200") });
 
             // 结束 IDO
-            await ethers.provider.send("evm_increaseTime", [3600 * 43+1]); // 快进使 IDO 结束
+            await ethers.provider.send("evm_increaseTime", [3600 * 61]); // 快进使 IDO 结束
             await ethers.provider.send("evm_mine");
 
             const ExpectedAmount = await aiStarterPublicSale.getExpectedAmount(addr1);
@@ -420,11 +446,11 @@ describe("PriPizzapad Contract", function () {
             await ethers.provider.send("evm_mine");
 
             const unlockRatio = await aiStarterPublicSale.getIDOUnlockRatio();
-            expect(unlockRatio).to.equal(9916);
+            expect(unlockRatio).to.equal(9833);
             await ethers.provider.send("evm_increaseTime", [2 * 24 * 3600]);
             await ethers.provider.send("evm_mine");
             const unlockRatio2 = await aiStarterPublicSale.getIDOUnlockRatio();
-            expect(unlockRatio2).to.equal(9972);
+            expect(unlockRatio2).to.equal(9888);
 
             await ethers.provider.send("evm_increaseTime", [5* 24 * 3600]);
             await ethers.provider.send("evm_mine");
@@ -510,14 +536,14 @@ describe("PriPizzapad Contract", function () {
 
         it("9.2 Should allow withdrawal by mFundAddress", async function () {
             await aiStarterPublicSale.setStart(true);
-            const proof = getProofForAddress(addr1.address);
-            await aiStarterPublicSale.connect(addr1).joinIdo(proof,{ value: ethers.parseEther("0.004") }); 
-            await ethers.provider.send("evm_increaseTime", [3600 * 53]); // 快进使IDO结束 43小时
+            const proof = getProofForAddress(owner.address);
+            await aiStarterPublicSale.connect(owner).joinIdo(proof,{ value: ethers.parseEther("0.004") }); 
+            await ethers.provider.send("evm_increaseTime", [3600 * 61]); // 快进使IDO结束 61小时
             await ethers.provider.send("evm_mine");
-            const addr1Balance=await ethers.provider.getBalance(addr1.address);
-            await aiStarterPublicSale.connect(addr1).withdraw(ethers.parseUnits("0.004", 18));
-            const addr1Balance2=await ethers.provider.getBalance(addr1.address);
-            expect(addr1Balance2).to.be.gt(addr1Balance);
+            const addr1Balance=await ethers.provider.getBalance(owner.address);
+            await aiStarterPublicSale.connect(owner).withdraw(ethers.parseUnits("0.004", 18));
+            const addr1Balance2=await ethers.provider.getBalance(owner.address);
+            expect(addr1Balance).to.be.above(addr1Balance2);
 
         });
     });
