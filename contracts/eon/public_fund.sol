@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "hardhat/console.sol";
 
-contract Pizzapad is Ownable, ReentrancyGuard {
+contract PubPizzapad is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     // IDO token address
     IERC20 public rewardToken;
