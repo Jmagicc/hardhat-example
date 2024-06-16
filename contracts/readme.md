@@ -4,15 +4,17 @@
 ## 钱包地址2(收取基金): 0x90F8FAF894700a4523749c8137715043C9a952B6
 ## 私钥: 3992603cea6fad5b611f8cc5d916a70650cfdd7f5c4e97d3727a0c8ea9995aa5
 
-## B² testnet  already CLOTToken send rewardAmount-> Pizzapad   25000000000000000000000000
-####  CLOTToken: 0x51C2221183Dc119C995bB83DD3912c10117df2BC
+## B² testnet  already CLOTToken send rewardAmount-> Pizzapad   25000000000000000000000000 
+####  CLOTToken: 0x22ADa3eb7C4c9BAfF3eaBC3d1a14EB0ed146C85E
 ####  Pizzapad: 0x3faE39D61ca46612e9C3Ff06724c651EbCA45e68      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000   
 
 
 
 
+## B² testnet  already eonToken send rewardAmount-> PriFund   1100000000000000000000000
+####  eonToken: 0x22ADa3eb7C4c9BAfF3eaBC3d1a14EB0ed146C85E
+####  PriFund: 0x908F7A1B0a93fCf9607abD0d70d88f502beB9368      joinIdoPrice: 725000000000   rewardAmount:725000000000000000
 
-[//]: # (####  &#40;testnet- 每隔5分钟线性释放&#41;PizzapadV3: 0xcFc7658d503B76995B9106216d2DEd39B8f80477      joinIdoPrice: 116000000000   rewardAmount:2900000000000000000)
 
 
-### B²主网合约: 0x483371489f0cBea9a717630F469515dD6D169Ebb (部署者私钥我会另外给到Gray)
+### B²主网Pizza pad合约: 0x483371489f0cBea9a717630F469515dD6D169Ebb (部署者私钥我会另外给到Gray)
