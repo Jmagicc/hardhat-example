@@ -4,8 +4,8 @@ const fs = require('fs');
 const { log } = require('console');
 
 
-const jsonString = fs.readFileSync('./whiteList.json', 'utf8');
-// const jsonString = fs.readFileSync('./hardhat_dev_account.json', 'utf8');
+// const jsonString = fs.readFileSync('./whiteList.json', 'utf8');
+const jsonString = fs.readFileSync('./merkel/hardhat_dev_account.json', 'utf8');
 const WhiteList = JSON.parse(jsonString);
 const leaves = WhiteList.map((x) => keccak256(x));
 const merkleTree = new MerkleTree(leaves, keccak256, { sortPairs: true });
@@ -41,7 +41,7 @@ console.log('verify:: ', isWhiteList);
 
 // Read whitelist addresses and create Merkle trees
 function createMerkleTree() {
-    // const jsonString = fs.readFileSync('./merkel/hardhat_dev_account.json', 'utf8');
+    const jsonString = fs.readFileSync('./merkel/hardhat_dev_account.json', 'utf8');
     const WhiteList = JSON.parse(jsonString);
 
     const leaves = WhiteList.map(x => keccak256(x));

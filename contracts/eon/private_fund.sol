@@ -209,7 +209,8 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
             "Pizzapad: already end!"
         );
 
-        // 验证用户是否在白名单中
+        require(_sumAmount <= rewardAmount, "Pizzapad: Total participation exceeds the reward amount limit");
+
         bool isWhitelisted = verifyAddressInWhitelist(msg.sender, proof);
         require(isWhitelisted,"Pizzapad:  The address is not on the whitelist");
 
