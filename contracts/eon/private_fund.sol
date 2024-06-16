@@ -23,6 +23,8 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
     uint256 public startTime;
     // endTime = startTime + dt;  TODO
     uint256 public dt = 20 * 3600;
+
+    uint256 public endTimeAfterClaim=  3 * 3600;
     // first claim = endtime + claimDt1
     uint256 public claimDt1;
 
@@ -71,7 +73,7 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
         joinIdoPrice = _joinIdoPrice;
         rewardAmount = _rewardAmount;
         // default claim time can be modify if needed
-        claimDt1 = dt + 3 * 3600;
+        claimDt1 = dt + endTimeAfterClaim;
 
 
         rewardToken = IERC20(_rewardToken);
@@ -160,8 +162,8 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
 
     // get unlock Ratio
     function getIDOUnlockRatio() public view returns (uint256) {
-        if (block.timestamp < startTime + claimDt1) return 0;
-        if (block.timestamp < startTime + claimDt1 + claimPeriod) return 5000;
+        if (block.timestamp < startTime + endTimeAfterClaim) return 0;
+        if (block.timestamp < startTime + claimDt1) return 5000;
         // unlock 50% in 180 days
         uint256 period = (block.timestamp - startTime - dt - claimDt1) / claimPeriod;
         if (period > 180) return 10000;
@@ -209,7 +211,7 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
             "Pizzapad: already end!"
         );
 
-        require(_sumAmount <= rewardAmount, "Pizzapad: Total participation exceeds the reward amount limit");
+        require(_sumAmount < rewardAmount, "Pizzapad: Total participation exceeds the reward amount limit");
 
         bool isWhitelisted = verifyAddressInWhitelist(msg.sender, proof);
         require(isWhitelisted,"Pizzapad:  The address is not on the whitelist");
