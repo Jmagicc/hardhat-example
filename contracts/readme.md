@@ -13,7 +13,7 @@
 
 ## B² testnet  already eonToken send rewardAmount-> PriFund   1100000000000000000000000
 ####  eonToken: 0x22ADa3eb7C4c9BAfF3eaBC3d1a14EB0ed146C85E
-####  PriFund: 0x908F7A1B0a93fCf9607abD0d70d88f502beB9368      joinIdoPrice: 725000000000   rewardAmount:725000000000000000
+####  PriFund: 0xe736C23A3A9FbcB8b451E2FC5DC2a0bD1d35C96E      joinIdoPrice: 757500000000   rewardAmount:757500000000000000
 
 
 

@@ -41,7 +41,7 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
     uint256 private totalClaimAmount;
 
     bytes32 public distributionRoot;
-    uint256 public whitelistMaxAmount = 0.004 ether;  // TODO
+    uint256 public whitelistMaxAmount = 0.0303 ether;
 
 
 
