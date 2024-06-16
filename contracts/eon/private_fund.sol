@@ -21,7 +21,7 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
     bool public mbStart;
     // public sale opening time
     uint256 public startTime;
-    // endTime = startTime + dt;  TODO
+    // endTime = startTime + dt;
     uint256 public dt = 20 * 3600;
 
     uint256 public endTimeAfterClaim=  3 * 3600;
@@ -162,15 +162,14 @@ contract PriPizzapad is Ownable, ReentrancyGuard {
 
     // get unlock Ratio
     function getIDOUnlockRatio() public view returns (uint256) {
-        if (block.timestamp < startTime + endTimeAfterClaim) return 0;
-        if (block.timestamp < startTime + claimDt1) return 5000;
+        if (block.timestamp < startTime + claimDt1) return 0;
+        if (block.timestamp < startTime + claimDt1 + claimPeriod) return 5000;
         // unlock 50% in 180 days
         uint256 period = (block.timestamp - startTime - dt - claimDt1) / claimPeriod;
         if (period > 180) return 10000;
         uint256 unlockRatio = 5000 * period / 180;
         return 5000 + unlockRatio;
     }
-
 
 
     // get all parameters associated with account

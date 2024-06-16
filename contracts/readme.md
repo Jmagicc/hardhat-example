@@ -20,4 +20,4 @@
 
 
 ### B²主网Pizza pad合约: 0x483371489f0cBea9a717630F469515dD6D169Ebb (部署者私钥我会另外给到Gray)
-### B² 私募合约: 0x75a11944A0a63BC5a331063E5566C8d1e78AC600
+### B² 私募合约: 0x7efA6edBE386dB72bEfae56E0C0166E23Dfe29a2
