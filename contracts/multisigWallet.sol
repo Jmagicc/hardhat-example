@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MultisigWallet {
 
@@ -25,7 +24,7 @@ contract MultisigWallet {
 
 
     function _setupOwners(address[] memory _owners, uint256 _threshold) internal {
-        require(threshold == 0, "mulerr:: The threshold can not be initialized to 0");
+        require(_threshold > 0, "The threshold can not be 0");
         require(_threshold <= _owners.length, "Multi-signature implementation threshold, less than, multi-signature number");
         require(_threshold >= 1, "Multi-signature implementation threshold of at least 1");
 
