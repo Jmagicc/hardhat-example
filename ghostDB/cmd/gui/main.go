@@ -86,10 +86,13 @@ var rootCmd = &cobra.Command{
 				setMainWalletCmd.Run(cmd, []string{setMainWalletArgs})
 
 			case 5:
-				fmt.Println("请选择网络节点编号:")
+				fmt.Println("请选择网络节点的编号:")
 				fmt.Println("0: http://localhost:8545")
 				fmt.Println("1: https://b2-mainnet.alt.technology")
 				fmt.Println("2: https://b2-testnet.alt.technology")
+				fmt.Println("3: https://rpc.zklink.io (Nova Mainnet)")
+				fmt.Println("4: https://sepolia.rpc.zklink.io (Nova Testnet)")
+
 				var nodeChoice int
 				fmt.Scanln(&nodeChoice)
 				setNetNodeCmd.Run(cmd, []string{strconv.Itoa(nodeChoice)})
@@ -233,7 +236,7 @@ var setNetNodeCmd = &cobra.Command{
 		}
 
 		nodeChoice, err := strconv.Atoi(args[0])
-		if err != nil || nodeChoice < 0 || nodeChoice > 2 {
+		if err != nil || nodeChoice < 0 {
 			log.Println("错误:: 无效的节点编号")
 			return
 		}
@@ -245,6 +248,10 @@ var setNetNodeCmd = &cobra.Command{
 			netNode = "https://b2-mainnet.alt.technology"
 		case 2:
 			netNode = "https://b2-testnet.alt.technology"
+		case 3:
+			netNode = "https://rpc.zklink.io"
+		case 4:
+			netNode = "https://sepolia.rpc.zklink.io"
 		default:
 			log.Println("错误:: 无效的节点编号")
 			return
