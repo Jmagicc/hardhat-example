@@ -43,6 +43,7 @@ To set up and run the tests locally, follow these steps:
     - eg. `npx hardhat coverage --testfiles test/ai_starter_v2.js`
     - eg. `npx hardhat test --network localhost test/private_fund.js`
     - eg. `npx hardhat test --network localhost test/public_fund.js`
+    - eg. `npx hardhat test --network localhost test/fund_six_lock.js`
 
 
 
