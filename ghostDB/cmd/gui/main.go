@@ -80,7 +80,10 @@ var rootCmd = &cobra.Command{
 				fmt.Println("请输入合约中铸造NFT的函数名称(默认是mint):")
 				var mintFuncName string
 				fmt.Scanln(&mintFuncName)
-				batchMintCmd.Run(cmd, []string{preRange, afterRange, mintContractAddress, abiFileName, mintFuncName})
+				fmt.Println("NFT合约是否采用白名单,如果是回复 1:")
+				var whiteFileName string
+				fmt.Scanln(&whiteFileName)
+				batchMintCmd.Run(cmd, []string{preRange, afterRange, mintContractAddress, abiFileName, mintFuncName, whiteFileName})
 			case 4:
 				fmt.Print("请输入设置主钱包私钥: ")
 				var setMainWalletArgs string
@@ -163,7 +166,7 @@ var distributeFeesCmd = &cobra.Command{
 	Use:   "distributeFees",
 	Short: "分发手续费功能",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 3 || args[0] == "" || args[1] == "" || args[2] == "" {
+		if args[0] == "" || args[1] == "" || args[2] == "" {
 			log.Println("错误:: 钱包编号和金额请不要为空")
 			return
 		}
@@ -207,8 +210,12 @@ var batchMintCmd = &cobra.Command{
 			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
 			return
 		}
-
-		batchMint.BatchMint(MemoryCache, pre, after, args[2], args[3], args[4])
+		if args[5] == "1" {
+			// 采用白名单
+			batchMint.WithWhiteListBatchMint(MemoryCache, pre, after, args[2], args[3], args[4])
+		} else {
+			batchMint.BatchMint(MemoryCache, pre, after, args[2], args[3], args[4])
+		}
 	},
 }
 
