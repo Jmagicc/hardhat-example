@@ -154,8 +154,8 @@ var collectCmd = &cobra.Command{
 		}
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
-		if err != nil || pre < 1 || pre > 500 || after < pre || after < 1 || after > 500 {
-			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
+		if err != nil || pre < 1 || pre > 2000 || after < pre || after < 1 || after > 2000 {
+			log.Println("错误:: 钱包编号请为 1-2000的区间里,且前置范围不能大于后置范围")
 			return
 		}
 		integrate.Integrate(MemoryCache, pre, after)
@@ -172,8 +172,8 @@ var distributeFeesCmd = &cobra.Command{
 		}
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
-		if err != nil || pre < 1 || pre > 500 || after < pre || after < 1 || after > 500 {
-			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
+		if err != nil || pre < 1 || pre > 2000 || after < pre || after < 1 || after > 2000 {
+			log.Println("错误:: 钱包编号请为 1-2000的区间里,且前置范围不能大于后置范围")
 			return
 		}
 
@@ -206,8 +206,8 @@ var batchMintCmd = &cobra.Command{
 		}
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
-		if err != nil || pre < 1 || pre > 500 || after < pre || after < 1 || after > 500 {
-			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
+		if err != nil || pre < 1 || pre > 2000 || after < pre || after < 1 || after > 2000 {
+			log.Println("错误:: 钱包编号请为 1-2000的区间里,且前置范围不能大于后置范围")
 			return
 		}
 		if args[5] == "1" {
@@ -229,8 +229,8 @@ var getWalletKeyCmd = &cobra.Command{
 		}
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
-		if err != nil || pre < 1 || pre > 500 || after < pre || after < 1 || after > 500 {
-			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
+		if err != nil || pre < 1 || pre > 2000 || after < pre || after < 1 || after > 2000 {
+			log.Println("错误:: 钱包编号请为 1-2000的区间里,且前置范围不能大于后置范围")
 			return
 		}
 		getWalletPri.GetWalletPri(pre, after)
@@ -316,8 +316,8 @@ var whiteListJoinIdoCmd = &cobra.Command{
 
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
-		if err != nil || pre < 1 || pre > 500 || after < pre || after < 1 || after > 500 {
-			log.Println("错误:: 钱包编号请为 1-500的区间里,且前置范围不能大于后置范围")
+		if err != nil || pre < 1 || pre > 2000 || after < pre || after < 1 || after > 2000 {
+			log.Println("错误:: 钱包编号请为 1-2000的区间里,且前置范围不能大于后置范围")
 			return
 		}
 		if args[5] == "" {

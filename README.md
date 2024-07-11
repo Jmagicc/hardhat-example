@@ -44,6 +44,8 @@ To set up and run the tests locally, follow these steps:
     - eg. `npx hardhat test --network localhost test/private_fund.js`
     - eg. `npx hardhat test --network localhost test/public_fund.js`
     - eg. `npx hardhat test --network localhost test/fund_six_lock.js`
+    - eg. `npx hardhat test --network NovaTestnet script/deploy-nftdemo.js`
+    - eg. `npx hardhat test --network localhost test/zklink_nft.js`
 
 
 

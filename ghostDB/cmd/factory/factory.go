@@ -52,7 +52,7 @@ func main() {
 	// 准备JSON输出
 	var addresses []string
 
-	for i := 0; i < 250; i++ {
+	for i := 0; i < 1500; i++ {
 		address, privateKey, err := generateWallet()
 		if err != nil {
 			log.Fatal(err)
@@ -69,6 +69,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("追加成功", address)
 
 		// 添加到JSON输出
 		addresses = append(addresses, address)
@@ -83,5 +84,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("成功生成250个钱包地址，并保存到了ghostWallets.json和ghostWallets.db中")
+	fmt.Println("成功生成1500个钱包地址，并保存到了ghostWallets.json和ghostWallets.db中")
 }

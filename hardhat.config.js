@@ -10,7 +10,12 @@ module.exports = {
       url: "http://127.0.0.1:8545",
       gas: 8000000,
       blockGasLimit: "auto",
-
+    },
+    NovaTestnet: {
+      url: "https://sepolia.rpc.zklink.io",
+      gas: 8000000,
+      chainId: 810181,
+      blockGasLimit: "auto",
     },
     merlinTestnet: {
       url: "https://testnet-rpc.merlinchain.io",
