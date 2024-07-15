@@ -77,7 +77,7 @@ var rootCmd = &cobra.Command{
 				fmt.Println("请输入批量mint的钱包地址的后置范围是:")
 				var afterRange string
 				fmt.Scanln(&afterRange)
-				fmt.Println("请输入合约中铸造NFT的函数名称(默认是mint):")
+				fmt.Println("请输入合约中铸造NFT的函数名称(默认是mintNFT):")
 				var mintFuncName string
 				fmt.Scanln(&mintFuncName)
 				fmt.Println("NFT合约是否采用白名单,如果是回复 1:")
@@ -202,7 +202,7 @@ var batchMintCmd = &cobra.Command{
 		}
 
 		if args[4] == "" {
-			args[4] = "mint"
+			args[4] = "mintNFT"
 		}
 		pre, err := strconv.Atoi(args[0])
 		after, err := strconv.Atoi(args[1])
