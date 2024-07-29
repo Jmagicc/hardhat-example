@@ -3,8 +3,8 @@ const { ethers, network } = require("hardhat");
 
 async function main() {
     const [deployer, addr1, addr2] = await hre.ethers.getSigners(); // 获取部署者账户
-    // const targetContractAddress = "0xaEE762Ed710DA0DBC31c2f6E877055328143f6f7"; // 替换为你的目标合约地址
-    const targetContractAddress = "0xc9d994e2e2614be1218afb55104723c2c2b8aa13";
+    const targetContractAddress = "0xaEE762Ed710DA0DBC31c2f6E877055328143f6f7"; // 替换为你的目标合约地址
+    // const targetContractAddress = "0xc9d994e2e2614be1218afb55104723c2c2b8aa13";
 
 
     const tx = await addr1.sendTransaction({

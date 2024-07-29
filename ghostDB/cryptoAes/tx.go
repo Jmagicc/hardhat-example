@@ -38,13 +38,18 @@ waitNodeNonce:
 
 	// 创建交易
 	var data []byte
-	tx := types.NewTransaction(nonce, toAddressHex, value, uint64(21000), gasPrice, data)
+	tx := types.NewTransaction(nonce, toAddressHex, value, uint64(71000), gasPrice, data)
 
 	// 签署交易
 	chainID, err := client.NetworkID(context.Background())
 	if err != nil {
 		log.Fatalf("错误:: 无法获取网络ID: %v", err)
 	}
+	log.Println("nonce::", nonce)
+	log.Println("发送的金额", value)
+	log.Println("tx Gas:: ", tx.Gas())
+	log.Println("tx GasPrice:: ", gasPrice)
+	log.Println("tx data::", tx.Data())
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKeyECDSA)
 	if err != nil {
